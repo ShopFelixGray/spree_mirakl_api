@@ -42,11 +42,11 @@ module ActiveMerchant #:nodoc:
         return ActiveMerchant::Billing::Response.new(false, "Reimburstment Required", {}, {}) unless refund.reimbursement.present?
         refund.reimbursement.customer_return.return_items.each do |return_item|
           line_item = return_item.inventory_unit.line_item
-          # TODO FIX REASON CODE
+          # Look to refactor refund reasons code
           return_json << {  'amount': return_item.amount, 
                             'order_line_id': line_item.mirakl_order_line.mirakl_order_line_id, 
                             'shipping_amount': 0, 
-                            'reason_code': "15",
+                            'reason_code': line_item.mirakl_order_line.mirakl_store.mirakl_refund_reasons.joins(:refund_reasons).where(spree_refund_reasons: { id: 3 }).first.code || line_item.mirakl_order_line.mirakl_store.mirakl_refund_reasons.first.code,,
                             'taxes': taxes_json(line_item.mirakl_order_line.mirakl_order_line_taxes.taxes, line_item.quantity),
                             'shipping_taxes': taxes_json(line_item.mirakl_order_line.mirakl_order_line_taxes.shipping_taxes, line_item.quantity),
                             'quantity': 1,

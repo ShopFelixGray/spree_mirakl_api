@@ -16,3 +16,12 @@
     </div>
   </div>
 <% end %>
+
+<% @mirakl_store.mirakl_refund_reasons.each do |mirakl_reason| %>
+  <%= form_for mirakl_reason, url: admin_mirakl_store_map_refunds_path(mirakl_reason), method: :put do |f| %>
+    <%= mirakl_reason.label %>
+    <%= f.hidden_field :mirakl_reason_id, value: mirakl_reason.id %>
+    <%= f.collection_check_boxes :refund_reason_ids, Spree::RefundReason.all, :id, :name %>
+    <%= f.submit %>
+  <% end %>
+<% end %> 

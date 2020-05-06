@@ -8,6 +8,7 @@ FactoryGirl.define do
     api_key "test_key"
     url "https://test.com"
     active true
+    shop_id 1
     user  { FactoryGirl.create(:user) }
   end
 
