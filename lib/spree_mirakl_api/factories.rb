@@ -23,4 +23,10 @@ FactoryGirl.define do
     end
 
   end
+
+  factory :mirakl_payment_method, class: Spree::Gateway::Mirakl do
+    name 'Mirakl'
+    active true
+    auto_capture true
+  end
 end
