@@ -4,6 +4,8 @@ class CreateSpreeMiraklStores < ActiveRecord::Migration
       t.string :name
       t.string :api_key
       t.boolean :active, default: true
+      t.text :url
+      t.references :user, index: true
       t.timestamps null: false
     end
   end
