@@ -121,7 +121,7 @@ module Mirakl
       end
 
       describe 'process_orders' do 
-        let!(:product) { create(:lens_product) }
+        let!(:product) { create(:product_in_stock) }
         context 'when a single item is sent correctly' do
           before do
             stub_request(:get, "#{store.url}/api/orders?order_state_codes=WAITING_ACCEPTANCE").

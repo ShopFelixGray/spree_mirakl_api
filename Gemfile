@@ -6,4 +6,9 @@ gem 'spree_auth_devise', github: 'spree/spree_auth_devise', branch: '3-1-stable'
 
 gem 'httparty'
 
+group :test do
+  gem 'codeclimate-test-reporter', require: nil
+  gem 'webmock'
+end
+
 gemspec
