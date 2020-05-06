@@ -58,7 +58,39 @@ module Mirakl
               "offer_sku": product.sku,
               "order_line_id": "201807130411578146106997",
               "quantity": 2,
-              "received_date": "2020-05-04T19:57:41Z"
+              "received_date": "2020-05-04T19:57:41Z",
+              "shipping_taxes": [
+                {
+                  "amount": 0.30,
+                  "amount_breakdown": {
+                    "parts": [
+                      {
+                        "amount": 0.30,
+                        "commissionable": false,
+                        "debitable_from_customer": true,
+                        "payable_to_shop": true
+                      }
+                    ]
+                  },
+                  "code": "shipping-tax-amount"
+                }
+              ],
+              "taxes": [
+                {
+                  "amount": 0.72,
+                  "amount_breakdown": {
+                    "parts": [
+                      {
+                        "amount": 0.72,
+                        "commissionable": false,
+                        "debitable_from_customer": true,
+                        "payable_to_shop": true
+                      }
+                    ]
+                  },
+                  "code": "product-tax-amount"
+                }
+              ]
             }
           ],
           "total_price": 194.95
