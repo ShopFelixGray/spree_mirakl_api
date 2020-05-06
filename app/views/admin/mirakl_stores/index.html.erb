@@ -1,0 +1,40 @@
+<% content_for :page_title do %>
+  <%= plural_resource_name(Spree::MiraklStore) %>
+<% end %>
+
+<% content_for :page_actions do %>
+  <span id="new_ot_link">
+    <%= button_link_to Spree.t(:new_mirakl_store), new_object_url, { class: "btn-success", icon: 'add', id: 'new_mirakl_store_link' } %>
+  </span>
+<% end %>
+
+<div id="new_mirakl_store"></div>
+
+<% if @mirakl_stores.any? %>
+<table class="table sortable" id="listing_mirakl_stores" data-hook>
+  <thead>
+    <tr data-hook="option_header">
+      <th><%= Spree.t(:name) %></th>
+      <th><%= Spree.t(:active) %></th>
+      <th class="actions"></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @mirakl_stores.each do |mirakl_store| %>
+      <tr class="spree_mirakl_store <%= cycle('odd', 'even')%>" id="<%= spree_dom_id mirakl_store %>" data-hook="option_row">
+        <td><%= mirakl_store.name %></td>
+        <td class="presentation"><%= mirakl_store.active %></td>
+        <td class="actions actions-2 text-right">
+          <%= link_to_edit(mirakl_store, class: 'admin_edit_mirakl_store', no_text: true) %>
+          <%= link_to_delete(mirakl_store, no_text: true) %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+<% else %>
+  <div class="alert alert-info no-objects-found">
+    <%= Spree.t(:no_resource_found, resource: plural_resource_name(Spree::MiraklStore)) %>,
+    <%= link_to Spree.t(:add_one), new_object_url %>!
+  </div>
+<% end %> 

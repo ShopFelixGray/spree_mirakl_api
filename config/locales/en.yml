@@ -2,4 +2,8 @@
 # See https://github.com/svenfuchs/rails-i18n/tree/master/rails%2Flocale for starting points.
 
 en:
-  hello: "Hello world"
+  spree:
+    mirakl_stores: Mirakl Stores
+    new_mirakl_store: New Mirakl Store
+    api_key: API Key
+    url: URL
