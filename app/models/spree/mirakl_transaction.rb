@@ -1,6 +1,6 @@
 class Spree::MiraklTransaction < ActiveRecord::Base
   belongs_to :order
-  belongs_to :return_authorization
+  belongs_to :mirakl_store
 
   def reusable_sources(_order)
     []

@@ -1,0 +1,13 @@
+<fieldset data-hook="mirakl">
+  <legend align="center"><%= Spree.t(:transaction, :scope => :mirakl) %></legend>
+
+  <div class="row">
+
+    <div class="alpha six columns">
+      <dl>
+        <dt><%= Spree.t(:state, :scope => :mirakl) %>:</dt>
+        <dd><%= payment.state.titleize %></dd>
+      </dl>
+    </div>
+  </div>
+</fieldset> 

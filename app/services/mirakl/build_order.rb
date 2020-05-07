@@ -12,8 +12,11 @@ module Mirakl
 
     def call
       begin
-        order_data = get_order(@mirakl_order_id, @store)
-        build_order_for_user(order_data, @store)
+        # If order already exist we dont want to remake it. We may want to alert admin some how with an email
+        unless Spree::MiraklTransaction.find_by(mirakl_order_id: @mirakl_order_id).present?
+          order_data = get_order(@mirakl_order_id, @store)
+          build_order_for_user(order_data, @store)
+        end
       rescue ServiceError => error
         add_to_errors(error.messages)
       end
@@ -40,16 +43,18 @@ module Mirakl
           new_order = add_line_items(new_order, order_data[:order_lines])
           new_order.billing_address = build_address(order_data[:customer][:billing_address], new_order.user)
           new_order.ship_address = build_address(order_data[:customer][:shipping_address], new_order.user)
-          create_payment(new_order, order_data[:total_price], order_data[:order_id])
+          create_payment(new_order, order_data[:total_price], order_data[:order_id], store)
 
           while order_next(new_order);end
 
           @order = new_order
           unless new_order.complete?
-            raise ServiceError.new(["Could not complete order: #{new_order.errors.full_messages.try(:first)}"])
+            puts new_order.errors.full_messages
+            raise Exception.new("Could not complete order: #{new_order.errors.full_messages.try(:first)}")
           end
         end
       rescue Exception => e
+        puts e
         raise ServiceError.new(["Could not complete order: #{e.message}"])
       end
     end
@@ -57,7 +62,10 @@ module Mirakl
     def add_line_items(order, order_lines)
       order_lines.each do |order_line|
         variant = Spree::Variant.includes(:stock_items).find_by(sku: order_line[:offer_sku])
-        order.contents.add(variant, order_line[:quantity])
+        line_item_added = order.contents.add(variant, order_line[:quantity])
+        mirakl_order_line = Spree::MiraklOrderLine.create!(line_item: line_item_added, mirakl_order_line_id: order_line[:order_line_id])
+        build_taxes(order_line[:taxes], mirakl_order_line, 'tax')
+        build_taxes(order_line[:shipping_taxes], mirakl_order_line, 'shipping_tax')
       end
       return order
     end
@@ -80,6 +88,17 @@ module Mirakl
       )
     end
 
+    def build_taxes(order_line_taxes, mirakl_order_line, tax_type)
+      order_line_taxes.each do |tax|
+        Spree::MiraklOrderLineTax.create!(
+          tax_type: tax_type,
+          amount: tax['amount'],
+          code: tax['code'],
+          mirakl_order_line: mirakl_order_line
+        )
+      end
+    end
+
     def get_country_for(country_iso)
       Spree::Country.find_by(iso: country_iso)
     end
@@ -88,7 +107,7 @@ module Mirakl
       Spree::State.find_by(abbr: state_abbr, country: country)
     end
 
-    def create_payment(order, amount, mirakl_order_number)
+    def create_payment(order, amount, mirakl_order_number, store)
       begin
         payment = order.payments.build order: order
         payment.amount = amount
@@ -96,7 +115,7 @@ module Mirakl
         payment.created_at = Time.current()
         payment.payment_method = Spree::PaymentMethod.find_by_name!("Mirakl")
         payment.response_code = mirakl_order_number
-        payment.source = Spree::MiraklTransaction.create!(order: order)
+        payment.source = Spree::MiraklTransaction.create!(order: order, mirakl_order_id: mirakl_order_number, mirakl_store: store)
         payment.save!
         payment
       rescue Exception => e

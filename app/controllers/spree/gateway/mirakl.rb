@@ -20,9 +20,5 @@ module Spree
     def self.version
       "1.0"
     end
-
-    def cancel(mirakl_store)
-      ActiveMerchant::Billing::Response.new(true, "", {}, {})
-    end
   end
 end
