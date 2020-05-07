@@ -24,15 +24,12 @@
   </div>
 
 <div class='col-md-12'>
-  <%= f.field_container :user_id, class: ['form-group'] do %>
-    <%= f.label :user, Spree.t(:user) %> <span class='required'>*</span>
-    <%= f.select :user_id,
-        options_for_select(Spree::User.all.map {|user| [user.email, user.id]},
-        _selected_key = f.object.user_id),
-        { :include_blank => Spree.t("match_choices.select_one") },
-        { :required => true, :class => "select2" }
-    %>
-  <% end %>
+  <div data-hook="user_id_mirakl_user">
+    <%= f.field_container :user_id, class: ['form-group'] do %>
+      <%= f.label :user, Spree.t(:user) %>
+      <%= f.hidden_field :user_id, value: @mirakl_store.user.id %>
+    <% end %>
+  </div>
 </div>
 
 
