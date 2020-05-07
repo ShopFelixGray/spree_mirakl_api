@@ -7,6 +7,8 @@ class Spree::MiraklStore < ActiveRecord::Base
 
   after_create :pull_in_shop_info
 
+  scope :active, -> { where(active: true) }
+
   def pull_in_shop_info
     # TODO: Look to refactor if possible
     if self.shop_id.nil?
