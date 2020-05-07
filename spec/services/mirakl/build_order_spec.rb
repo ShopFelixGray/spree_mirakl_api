@@ -11,7 +11,7 @@ module Mirakl
     let!(:payment_method) { create(:mirakl_payment_method) }
 
     let(:service_arguments) {{
-      order_id: 'test',
+      mirakl_order_id: 'test',
       store: store
     }}
 
@@ -159,7 +159,7 @@ module Mirakl
       describe 'get_order' do
         it 'processes the json correctly' do
           json_results = service.send(:get_order, 'test', store)
-          expect(json_results).to eq(JSON.parse(order_data)['orders'][0])
+          expect(json_results).to eq(JSON.parse(order_data, {symbolize_names: true})[:orders][0])
         end
 
         describe 'when there is an error' do
@@ -178,20 +178,20 @@ module Mirakl
 
       describe 'build_order_for_user' do
         it 'creates the order' do
-          expect{service.send(:build_order_for_user, JSON.parse(order_data)['orders'][0], store)}.to change{Spree::Order.count}.by(1)
+          expect{service.send(:build_order_for_user, JSON.parse(order_data, {symbolize_names: true})[:orders][0], store)}.to change{Spree::Order.count}.by(1)
         end
 
         it 'creates a transaction' do
-          expect{service.send(:build_order_for_user, JSON.parse(order_data)['orders'][0], store)}.to change{Spree::MiraklTransaction.count}.by(1)
+          expect{service.send(:build_order_for_user, JSON.parse(order_data, {symbolize_names: true})[:orders][0], store)}.to change{Spree::MiraklTransaction.count}.by(1)
         end
 
         it 'sets the order channel correctly' do
-          service.send(:build_order_for_user, JSON.parse(order_data)['orders'][0], store)
+          service.send(:build_order_for_user, JSON.parse(order_data, {symbolize_names: true})[:orders][0], store)
           expect(service.order.channel).to eq('mirakl')
         end
 
         it 'is a complete order' do
-          service.send(:build_order_for_user, JSON.parse(order_data)['orders'][0], store)
+          service.send(:build_order_for_user, JSON.parse(order_data, {symbolize_names: true})[:orders][0], store)
           expect(service.order.state).to eq('complete')
         end
 
