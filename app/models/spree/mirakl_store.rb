@@ -14,15 +14,15 @@ class Spree::MiraklStore < ActiveRecord::Base
       request = mirakl_request.get("/api/account")
 
       if request.success?
-        self.update(shop_id: JSON.parse(request.body)['shop_id'])
+        self.update(shop_id: JSON.parse(request.body, {symbolize_names: true})[:shop_id])
 
         reasons_request = mirakl_request.get("/api/reasons/REFUND?shop_id=#{self.shop_id}")
         if reasons_request.success?
-          refund_types = JSON.parse(request.body)['reasons']
+          refund_types = JSON.parse(request.body, {symbolize_names: true})[:reasons]
 
           refund_types.each do |refund_type|
-            unless mirakl_refund_reasons.where(label: refund_type['label'], code: refund_type['code']).present?
-              Spree::MiraklRefundReason.create!(label: refund_type['label'], code: refund_type['code'], mirakl_store: self)
+            unless mirakl_refund_reasons.where(label: refund_type[:label], code: refund_type[:code]).present?
+              Spree::MiraklRefundReason.create!(label: refund_type[:label], code: refund_type[:code], mirakl_store: self)
             end
           end
         else
@@ -34,15 +34,16 @@ class Spree::MiraklStore < ActiveRecord::Base
     end
   end
 
+  # TODO: Add these as buttons to call on the edit page for if there is ever an error or issue
   def sync_reasons
     mirakl_request = SpreeMirakl::Request.new(self)
     reasons_request = mirakl_request.get("/api/reasons/REFUND?shop_id=#{self.shop_id}")
     if reasons_request.success?
-      refund_types = JSON.parse(request.body)['reasons']
+      refund_types = JSON.parse(request.body, {symbolize_names: true})[:reasons]
 
       refund_types.each do |refund_type|
-        unless mirakl_refund_reasons.where(label: refund_type['label'], code: refund_type['code']).present?
-          Spree::MiraklRefundReason.create!(label: refund_type['label'], code: refund_type['code'], mirakl_store: self)
+        unless mirakl_refund_reasons.where(label: refund_type[:label], code: refund_type[:code]).present?
+          Spree::MiraklRefundReason.create!(label: refund_type[:label], code: refund_type[:code], mirakl_store: self)
         end
       end
     else
@@ -55,7 +56,7 @@ class Spree::MiraklStore < ActiveRecord::Base
     request = mirakl_request.get("/api/account")
 
     if request.success?
-      self.update(shop_id: JSON.parse(request.body)['shop_id'])
+      self.update(shop_id: JSON.parse(request.body, {symbolize_names: true})[:shop_id])
     else
       raise Exception.new('Issue getting shop ID. Please try again')
     end

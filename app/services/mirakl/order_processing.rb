@@ -24,7 +24,7 @@ module Mirakl
     def get_orders(store)
       request = SpreeMirakl::Request.new(store).get("/api/orders?order_state_codes=WAITING_ACCEPTANCE?shop_id=#{store.shop_id}")
       begin
-        return JSON.parse(request.body)['orders']
+        return JSON.parse(request.body, {symbolize_names: true})[:orders]
       rescue
         raise ServiceError.new(["Error in getting Waiting Acceptance"])
       end
@@ -33,9 +33,8 @@ module Mirakl
     def process_orders(orders, store)
       orders.each do |order|
         can_fulfill = true
-
-        order['order_lines'].each do |order_line|
-          service = Mirakl::StockCheck.new({sku: order_line['offer_sku'], quantity: order_line['quantity']})
+        order[:order_lines].each do |order_line|
+          service = Mirakl::StockCheck.new({sku: order_line[:offer_sku], quantity: order_line[:quantity]})
           if service.call
             can_fulfill = service.can_fulfill
           else
@@ -48,18 +47,18 @@ module Mirakl
     end
 
     def accept_or_reject_order(order, can_fulfill, store)
-      request = SpreeMirakl::Request.new(store).put("/api/orders/#{order['order_id']}/accept?shop_id=#{store.shop_id}", ({ 'order_lines': accept_or_reject_order_json(order, can_fulfill) }).to_json)
+      request = SpreeMirakl::Request.new(store).put("/api/orders/#{order[:order_id]}/accept?shop_id=#{store.shop_id}", ({ 'order_lines': accept_or_reject_order_json(order, can_fulfill) }).to_json)
 
       unless request.success?
-        raise ServiceError.new(["Issue Processing #{order['order_id']} can fulfill but request issue"])
+        raise ServiceError.new(["Issue Processing #{order[:order_id]} can fulfill but request issue"])
       end
     end
 
     def accept_or_reject_order_json(order, can_fulfill)
       order_data = []
 
-      order['order_lines'].each do |order_line|
-        order_data << { 'accepted': can_fulfill, 'id': order_line['order_line_id'] }
+      order[:order_lines].each do |order_line|
+        order_data << { 'accepted': can_fulfill, 'id': order_line[:order_line_id] }
       end
       order_data
     end

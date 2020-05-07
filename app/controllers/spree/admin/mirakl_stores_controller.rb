@@ -12,8 +12,10 @@ class Spree::Admin::MiraklStoresController < Spree::Admin::ResourceController
     @mirakl_store = Spree::MiraklStore.new(mirakl_store_params)
 
     if @mirakl_store.save
+      flash[:success] = Spree.t(:mirakl_store_created)
       redirect_to admin_mirakl_stores_path
     else
+      flash[:error] = @mirakl_store.errors.full_messages
       render :new
     end
   end
@@ -26,26 +28,36 @@ class Spree::Admin::MiraklStoresController < Spree::Admin::ResourceController
     @mirakl_store.update(mirakl_store_params)
 
     if @mirakl_store.save
+      flash[:success] = Spree.t(:mirakl_store_updated)
       redirect_to admin_mirakl_stores_path
     else
+      flash[:error] = @mirakl_store.errors.full_messages
       render :edit
     end
   end
 
   def destory
     if @mirakl_store.destory
+      flash[:success] = Spree.t(:mirakl_store_destroyed)
       redirect_to admin_mirakl_stores_path
     else
+      flash[:error] = @mirakl_store.errors.full_messages
       redirect_to :index
     end
   end
 
   def map_refunds
-    @mirakl_refund_reason = Spree::MiraklRefundReason.find(params[:mirakl_refund_reason][:mirakl_reason_id])
-    if @mirakl_refund_reason.update(refund_reason_ids: params[:mirakl_refund_reason][:refund_reason_ids])
+    begin
+      Spree::RefundReason.all.each do |refund_reason|
+        if params[refund_reason.id.to_s]
+          @mirakl_refund_reason = Spree::MiraklRefundReason.find(params[refund_reason.id.to_s])
+          @mirakl_refund_reason.update(refund_reason_ids: [refund_reason.id])
+        end
+      end
       flash[:sucess] = "Updated"
       redirect_to edit_admin_mirakl_store_path(@mirakl_refund_reason.mirakl_store)
-    else
+    rescue => exception
+      flash[:error] = exception.message
       redirect_to :index
     end
   end
@@ -57,6 +69,6 @@ class Spree::Admin::MiraklStoresController < Spree::Admin::ResourceController
   end
 
   def mirakl_store_params
-    params.require(:mirakl_store).permit(Spree::PermittedAttributes.mirakl_store_attributes)
+    params.require(:mirakl_store).permit(:name, :api_key, :url, :active, :user_id)
   end
 end 

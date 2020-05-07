@@ -11,21 +11,21 @@ module SpreeMirakl
     end
 
     def build_address
-      country = get_country_for(@data['country_iso_code'] || @data['country'])
-      state = get_state_for(@data['state'], country)
+      country = get_country_for(@data[:country_iso_code] || @data[:country])
+      state = get_state_for(@data[:state], country)
       # Start with these fields cause they are safe
       @address_data = {
-        address1: @data['street_1'],
-        address2: @data['street_2'],
-        city: @data['city'],
-        zipcode: @data['zip_code'],
-        firstname: convert_first_name(@data['firstname']) || 'Mirakl',
-        lastname: convert_last_name(@data['lastname']) || 'User',
+        address1: @data[:street_1],
+        address2: @data[:street_2],
+        city: @data[:city],
+        zipcode: @data[:zip_code],
+        firstname: convert_first_name(@data[:firstname]) || 'Mirakl',
+        lastname: convert_last_name(@data[:lastname]) || 'User',
         state_name: state.name,
         state: state,
-        company: @data['company'],
+        company: @data[:company],
         country: country,
-        phone: convert_phone(@data['phone_secondary']) || '0000000000'
+        phone: convert_phone(@data[:phone_secondary]) || '0000000000'
       }
 
       # Check if we are using spree address book

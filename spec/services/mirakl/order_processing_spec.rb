@@ -87,7 +87,7 @@ module Mirakl
 
           it 'gets the correct json' do
             data_call = service.send(:get_orders, store)
-            expect(data_call).to eq(JSON.parse('[{ "test_data": "testing" }]'))
+            expect(data_call).to eq(JSON.parse('[{ "test_data": "testing" }]', {symbolize_names: true}))
           end
         end
 
@@ -140,19 +140,19 @@ module Mirakl
       end
 
       it 'correctly pushes the order to mirakl' do
-        expect { service.send(:accept_or_reject_order, JSON.parse({ "order_id": '123' ,"order_lines": [] }.to_json), true, store) }.to raise_exception
+        expect { service.send(:accept_or_reject_order, JSON.parse({ "order_id": '123' ,"order_lines": [] }.to_json,  {symbolize_names: true}), true, store) }.to raise_exception
       end
     end
 
     describe 'accept_or_reject_order_json' do
       describe 'building the json' do
         it 'processes true correctly' do
-          json_data = service.send(:accept_or_reject_order_json, JSON.parse({ "order_lines": [{ "order_line_id": "201807130411578146106997" }] }.to_json), true)
+          json_data = service.send(:accept_or_reject_order_json, JSON.parse({ "order_lines": [{ "order_line_id": "201807130411578146106997" }] }.to_json,  {symbolize_names: true}), true)
           expect(json_data).to eq([{'accepted': true, 'id': '201807130411578146106997' }])
         end
 
         it 'processes false correctly' do
-          json_data = service.send(:accept_or_reject_order_json, JSON.parse({ "order_lines": [{ "order_line_id": "201807130411578146106997" }] }.to_json), false)
+          json_data = service.send(:accept_or_reject_order_json, JSON.parse({ "order_lines": [{ "order_line_id": "201807130411578146106997" }] }.to_json,  {symbolize_names: true}), false)
           expect(json_data).to eq([{'accepted': false, 'id': '201807130411578146106997' }])
         end
       end
