@@ -51,7 +51,7 @@ class Spree::Admin::MiraklStoresController < Spree::Admin::ResourceController
       Spree::RefundReason.all.each do |refund_reason|
         if params[refund_reason.id.to_s]
           @mirakl_refund_reason = Spree::MiraklRefundReason.find(params[refund_reason.id.to_s])
-          @mirakl_refund_reason.update(refund_reason_ids: [refund_reason.id])
+          @mirakl_refund_reason.update(refund_reason_ids: params.select{|key, hash|  hash == @mirakl_refund_reason.id.to_s }.keys)
         end
       end
       flash[:sucess] = "Updated"
