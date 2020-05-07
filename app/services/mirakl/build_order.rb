@@ -25,8 +25,7 @@ module Mirakl
     end
 
     def get_order(mirakl_order_id, store)
-      headers = { 'Authorization': store.api_key, 'Accept': 'application/json' }
-      request = HTTParty.get("#{store.url}/api/orders?order_ids=#{mirakl_order_id}", headers: headers)
+      request = SpreeMirakl::Request.new(store).get("/api/orders?order_ids=#{mirakl_order_id}&shop_id=#{store.shop_id}")
       if request.success?
         return JSON.parse(request.body, {symbolize_names: true})[:orders][0]
       else
@@ -71,40 +70,18 @@ module Mirakl
     end
 
     def build_address(address, user)
-      country = get_country_for(address[:country_iso_code] || address[:country])
-      state = get_state_for(address[:state], country)
-      Spree::Address.create!(
-        firstname: address[:firstname],
-        lastname: address[:lastname],
-        address1: address[:street_1],
-        address2: address[:street_2],
-        city: address[:city],
-        zipcode: address[:zip_code],
-        phone: address[:phone_secondary],
-        state_name: address[:state],
-        company: address[:company],
-        state: state,
-        country: country
-      )
+      SpreeMirakl::Address.new(address, user).build_address
     end
 
     def build_taxes(order_line_taxes, mirakl_order_line, tax_type)
       order_line_taxes.each do |tax|
         Spree::MiraklOrderLineTax.create!(
           tax_type: tax_type,
-          amount: tax['amount'],
-          code: tax['code'],
+          amount: tax[:amount],
+          code: tax[:code],
           mirakl_order_line: mirakl_order_line
         )
       end
-    end
-
-    def get_country_for(country_iso)
-      Spree::Country.find_by(iso: country_iso)
-    end
-
-    def get_state_for(state_abbr, country)
-      Spree::State.find_by(abbr: state_abbr, country: country)
     end
 
     def create_payment(order, amount, mirakl_order_number, store)

@@ -27,7 +27,7 @@
   <div data-hook="user_id_mirakl_user">
     <%= f.field_container :user_id, class: ['form-group'] do %>
       <%= f.label :user, Spree.t(:user) %>
-      <%= f.hidden_field :user_id, value: @mirakl_store.user.id %>
+      <%= f.hidden_field :user_id, value: @mirakl_store.try(:user).try(:id) %>
     <% end %>
   </div>
 </div>

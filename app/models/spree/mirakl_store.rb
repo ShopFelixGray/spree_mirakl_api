@@ -2,7 +2,7 @@ class Spree::MiraklStore < ActiveRecord::Base
   belongs_to :user
   has_many :mirakl_refund_reasons, dependent: :destroy
 
-  validates :name, :api_key, :url, presence: true
+  validates :name, :api_key, :url, :user_id, presence: true
   validates :name, :api_key, :url, :uniqueness => {:case_sensitive => false}
 
   after_create :pull_in_shop_info
@@ -10,27 +10,54 @@ class Spree::MiraklStore < ActiveRecord::Base
   def pull_in_shop_info
     # TODO: Look to refactor if possible
     if self.shop_id.nil?
-      headers = { 'Authorization': api_key, 'Accept': 'application/json' }
-      request = HTTParty.get("#{url}/api/account", headers: headers)
+      mirakl_request = SpreeMirakl::Request.new(self)
+      request = mirakl_request.get("/api/account")
 
       if request.success?
-        self.update(shop_id: JSON.parse(request.body)['shop_id'])
+        self.update(shop_id: JSON.parse(request.body, {symbolize_names: true})[:shop_id])
 
-        request = HTTParty.get("#{url}/api/reasons/REFUND", headers: headers)
-        if request.success?
-          refund_types = JSON.parse(request.body)['reasons']
+        reasons_request = mirakl_request.get("/api/reasons/REFUND?shop_id=#{self.shop_id}")
+        if reasons_request.success?
+          refund_types = JSON.parse(reasons_request.body, {symbolize_names: true})[:reasons]
 
           refund_types.each do |refund_type|
-            unless mirakl_refund_reasons.where(label: refund_type['label'], code: refund_type['code']).present?
-              Spree::MiraklRefundReason.create!(label: refund_type['label'], code: refund_type['code'], mirakl_store: self)
+            unless mirakl_refund_reasons.where(label: refund_type[:label], code: refund_type[:code]).present?
+              Spree::MiraklRefundReason.create!(label: refund_type[:label], code: refund_type[:code], mirakl_store: self)
             end
           end
         else
-          # TODO: ERROR
+          raise Exception.new('Issue syncing Refund Reasons. Please try again')
         end
       else
-        # TODO: ERROR
+        raise Exception.new('Issue getting shop ID. Please try again')
       end
     end
   end
+
+  # TODO: Add these as buttons to call on the edit page for if there is ever an error or issue
+  def sync_reasons
+    reasons_request = SpreeMirakl::Request.new(self).get("/api/reasons/REFUND?shop_id=#{self.shop_id}")
+    if reasons_request.success?
+      refund_types = JSON.parse(request.body, {symbolize_names: true})[:reasons]
+
+      refund_types.each do |refund_type|
+        unless mirakl_refund_reasons.where(label: refund_type[:label], code: refund_type[:code]).present?
+          Spree::MiraklRefundReason.create!(label: refund_type[:label], code: refund_type[:code], mirakl_store: self)
+        end
+      end
+    else
+      raise Exception.new('Issue syncing Refund Reasons. Please try again')
+    end
+  end
+
+  def sync_shop_id
+    request = SpreeMirakl::Request.new(self).get("/api/account")
+
+    if request.success?
+      self.update(shop_id: JSON.parse(request.body, {symbolize_names: true})[:shop_id])
+    else
+      raise Exception.new('Issue getting shop ID. Please try again')
+    end
+  end
+
 end

@@ -24,10 +24,6 @@ module ActiveMerchant #:nodoc:
         ActiveMerchant::Billing::Response.new(true, "", {}, {})
       end
 
-      def cancel(mirakl_source, options={})
-        ActiveMerchant::Billing::Response.new(true, "", {}, {})
-      end
-
       def void(mirakl_source, options = {})
         ActiveMerchant::Billing::Response.new(true, "", {}, {})
       end
@@ -39,23 +35,24 @@ module ActiveMerchant #:nodoc:
       def credit(money, mirakl_source, options = {})
         refund = options[:originator]
         return_json = []
-        return ActiveMerchant::Billing::Response.new(false, "Reimburstment Required", {}, {}) unless refund.reimbursement.present?
+        transaction = Spree::MiraklTransaction.find_by(mirakl_order_id: mirakl_source)
+        return ActiveMerchant::Billing::Response.new(false, "Reimburstment Required", {}, {}) unless refund.reimbursement.present? || transaction.present?
         refund.reimbursement.customer_return.return_items.each do |return_item|
-          line_item = return_item.inventory_unit.line_item
+          line_item_quantity = return_item.inventory_unit.line_item.quantity
+          mirakl_order_line = line_item.mirakl_order_line
           # Look to refactor refund reasons code
           return_json << {  'amount': return_item.amount, 
-                            'order_line_id': line_item.mirakl_order_line.mirakl_order_line_id, 
+                            'order_line_id': mirakl_order_line.mirakl_order_line_id, 
                             'shipping_amount': 0, 
-                            'reason_code': line_item.mirakl_order_line.mirakl_store.mirakl_refund_reasons.joins(:refund_reasons).where(spree_refund_reasons: { id: 3 }).first.code || line_item.mirakl_order_line.mirakl_store.mirakl_refund_reasons.first.code,,
-                            'taxes': taxes_json(line_item.mirakl_order_line.mirakl_order_line_taxes.taxes, line_item.quantity),
-                            'shipping_taxes': taxes_json(line_item.mirakl_order_line.mirakl_order_line_taxes.shipping_taxes, line_item.quantity),
+                            'reason_code': mirakl_order_line.mirakl_store.mirakl_refund_reasons.joins(:refund_reasons).where(spree_refund_reasons: { id: refund.refund_reason_id }).first.try(:code) || mirakl_order_line.mirakl_store.mirakl_refund_reasons.first.code,
+                            'taxes': taxes_json(mirakl_order_line.mirakl_order_line_taxes.taxes, line_item_quantity),
+                            'shipping_taxes': taxes_json(mirakl_order_line.mirakl_order_line_taxes.shipping_taxes, line_item_quantity),
                             'quantity': 1,
-                            'currency_iso_code': 'USD'
+                            'currency_iso_code': transaction.order.currency
                           }
         end
         # NOTE WE NEED SHOP ID NEED TO LOOK INTO WHERE THAT IS
-        headers = { 'Authorization': Spree::MiraklStore.first.api_key, 'Accept': 'application/json', 'Content-Type': 'application/json' }
-        request = HTTParty.put("#{Spree::MiraklStore.first.url}/api/orders/refund", body: ({ 'refunds': return_json }).to_json, headers: headers)
+        request = SpreeMirakl::Request.new(transaction.mirakl_store).put("/api/orders/refund??shop_id=#{transaction.mirakl_store.shop_id}", ({ 'refunds': return_json }).to_json)
 
         # We have to do it this way because if it is a success parsed response will have refunds
         # if it fails we get message
@@ -75,7 +72,7 @@ module ActiveMerchant #:nodoc:
         taxes.each do |tax|
           # We divide by quantity causes taxes come over on a per line item basis. If an order has 2 and we return one only half taxes should go back
           json_data << {
-            'amount': tax.amount/quantity,
+            'amount': tax.amount.to_f/quantity,
             'code': tax.code
           }
         end
