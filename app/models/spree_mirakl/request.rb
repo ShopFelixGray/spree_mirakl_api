@@ -29,8 +29,4 @@ class SpreeMirakl::Request
     @request.code
   end
 
-  private
-
-  
-
 end

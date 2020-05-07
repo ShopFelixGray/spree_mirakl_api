@@ -2,7 +2,7 @@ class Spree::MiraklStore < ActiveRecord::Base
   belongs_to :user
   has_many :mirakl_refund_reasons, dependent: :destroy
 
-  validates :name, :api_key, :url, presence: true
+  validates :name, :api_key, :url, :user_id, presence: true
   validates :name, :api_key, :url, :uniqueness => {:case_sensitive => false}
 
   after_create :pull_in_shop_info
@@ -18,7 +18,7 @@ class Spree::MiraklStore < ActiveRecord::Base
 
         reasons_request = mirakl_request.get("/api/reasons/REFUND?shop_id=#{self.shop_id}")
         if reasons_request.success?
-          refund_types = JSON.parse(request.body, {symbolize_names: true})[:reasons]
+          refund_types = JSON.parse(reasons_request.body, {symbolize_names: true})[:reasons]
 
           refund_types.each do |refund_type|
             unless mirakl_refund_reasons.where(label: refund_type[:label], code: refund_type[:code]).present?
@@ -36,8 +36,7 @@ class Spree::MiraklStore < ActiveRecord::Base
 
   # TODO: Add these as buttons to call on the edit page for if there is ever an error or issue
   def sync_reasons
-    mirakl_request = SpreeMirakl::Request.new(self)
-    reasons_request = mirakl_request.get("/api/reasons/REFUND?shop_id=#{self.shop_id}")
+    reasons_request = SpreeMirakl::Request.new(self).get("/api/reasons/REFUND?shop_id=#{self.shop_id}")
     if reasons_request.success?
       refund_types = JSON.parse(request.body, {symbolize_names: true})[:reasons]
 
@@ -52,8 +51,7 @@ class Spree::MiraklStore < ActiveRecord::Base
   end
 
   def sync_shop_id
-    mirakl_request = SpreeMirakl::Request.new(self)
-    request = mirakl_request.get("/api/account")
+    request = SpreeMirakl::Request.new(self).get("/api/account")
 
     if request.success?
       self.update(shop_id: JSON.parse(request.body, {symbolize_names: true})[:shop_id])
