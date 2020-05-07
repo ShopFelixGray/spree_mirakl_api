@@ -1,0 +1,42 @@
+<div data-hook='admin_mirkal_stores_form_fields' class='row'>
+  <div class='col-md-12'>
+    <%= f.field_container :name, class: ['form-group'] do %>
+      <%= f.label :name, Spree.t(:name) %> <span class='required'>*</span>
+      <%= f.text_field :name, class: 'form-control' %>
+      <%= f.error_message_on :name %>
+    <% end %>
+  </div>
+
+  <div class='col-md-12'>
+    <%= f.field_container :api_key, class: ['form-group'] do %>
+      <%= f.label :api_key, Spree.t(:api_key) %> <span class='required'>*</span>
+      <%= f.text_field :api_key, class: 'form-control' %>
+      <%= f.error_message_on :api_key %>
+    <% end %>
+  </div>
+
+  <div class='col-md-12'>
+    <%= f.field_container :url, class: ['form-group'] do %>
+      <%= f.label :url, Spree.t(:url) %> <span class='required'>*</span>
+      <%= f.text_field :url, class: 'form-control' %>
+      <%= f.error_message_on :url %>
+    <% end %>
+  </div>
+
+<div class='col-md-12'>
+  <div data-hook="user_id_mirakl_user">
+    <%= f.field_container :user_id, class: ['form-group'] do %>
+      <%= f.label :user, Spree.t(:user) %>
+      <%= f.hidden_field :user_id, value: @mirakl_store.try(:user).try(:id) %>
+    <% end %>
+  </div>
+</div>
+
+
+  <div class='col-md-12'>
+    <%= f.field_container :active, class: ['form-group'] do %>
+      <%= f.label :active, Spree.t(:active) %>
+      <%= f.check_box :active, class: 'form-control' %>
+    <% end %>
+  </div>
+</div>  

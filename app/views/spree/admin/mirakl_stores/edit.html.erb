@@ -1,0 +1,30 @@
+<% content_for :page_title do %>
+  <%= link_to Spree.t(:mirakl_stores), spree.admin_mirakl_stores_url %> /
+  <%= @mirakl_store.name %>
+<% end %>
+
+<%= render :partial => 'spree/admin/shared/error_messages', :locals => { :target => @mirakl_store } %>
+
+<%= form_for [:admin, @mirakl_store] do |f| %>
+  <div class="panel panel-default">
+    <div class="panel-body">
+      <%= render :partial => 'form', :locals => { :f => f } %>
+    </div>
+
+    <div class="panel-footer text-center">
+      <%= render :partial => 'spree/admin/shared/edit_resource_links' %>
+    </div>
+  </div>
+<% end %>
+
+<h2><%= Spree.t(:refund_reason_mapping) %></h2>
+<%= form_tag(admin_mirakl_store_map_refunds_path(@mirakl_store),  method: :put) do |f| %>
+  <% Spree::RefundReason.all.each do |refund_reason| %>
+    <div>
+      <%= label_tag refund_reason.name %>
+      <%= select_tag refund_reason.id, options_for_select(@mirakl_store.mirakl_refund_reasons.all.collect{ |u| [u.label, u.id] }, @mirakl_store.mirakl_refund_reasons.joins(:refund_reasons).where(spree_refund_reasons: { id: refund_reason.id }).first.try(:id) ) %>
+    </div>
+  <% end %>
+  
+  <%= submit_tag "Submit", class: 'btn btn-primary' %>
+<% end %> 
