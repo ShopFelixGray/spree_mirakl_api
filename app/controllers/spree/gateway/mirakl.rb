@@ -1,12 +1,6 @@
 module Spree
   class Gateway::Mirakl < Gateway
 
-    preference :default_stock_location, :integer, default: 1
-    preference :easypost_carrier_accounts_shipping, :string, default: ''
-    preference :UPS_bill_third_party_account, :string, default: ''
-    preference :UPS_bill_third_party_country, :string, default: ''
-    preference :UPS_bill_third_party_postal_code, :string, default: ''
-
     def provider_class
       ActiveMerchant::Billing::Mirakl
     end
