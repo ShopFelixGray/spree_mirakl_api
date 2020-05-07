@@ -135,7 +135,6 @@ module Mirakl
         context 'when no errors are present' do
           it 'returns true' do
             result = service.call
-            puts service.errors
             expect(result).to eq(true)
           end
         end
