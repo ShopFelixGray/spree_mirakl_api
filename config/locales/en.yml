@@ -7,3 +7,6 @@ en:
     new_mirakl_store: New Mirakl Store
     api_key: API Key
     url: URL
+    mirakl_store_created: Mirakl Store Created
+    mirakl_store_updated: Mirakl Store Updated
+    mirakl_store_destroyed: Mirakl Store Destroyed

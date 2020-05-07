@@ -1,8 +1,6 @@
 module Spree
   class Gateway::Mirakl < Gateway
 
-    preference :default_stock_location, :integer, default: 1
-
     def provider_class
       ActiveMerchant::Billing::Mirakl
     end
