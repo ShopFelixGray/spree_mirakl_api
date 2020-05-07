@@ -21,8 +21,7 @@ module Mirakl
     end
 
     def check_stock(sku, quantity)
-      # NOTE: Look how to remove n+1 query on this
-      variant = Spree::Variant.includes(:stock_items).find_by(sku: sku)
+      variant = Spree::Variant.find_by(sku: sku)
 
       if variant.present?
         @can_fulfill = quantity <= variant.total_on_hand

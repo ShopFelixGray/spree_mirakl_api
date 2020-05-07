@@ -1,4 +1,4 @@
-require 'rails_helper'
+require 'spec_helper'
 
 module Mirakl
   RSpec.describe OrderProcessing do
@@ -120,8 +120,8 @@ module Mirakl
         end
       end
 
-      describe "process_orders" do 
-        let!(:product) { create(:lens_product) }
+      describe 'process_orders' do 
+        let!(:product) { create(:product_in_stock) }
         context 'when a single item is sent correctly' do
           before do
             stub_request(:get, "#{store.url}/api/orders?order_state_codes=WAITING_ACCEPTANCE").
@@ -133,6 +133,32 @@ module Mirakl
             expect_any_instance_of(Mirakl::StockCheck).to receive(:call).once
             service.call
           end
+        end
+      end
+    end
+
+    describe 'accept_or_reject_order' do
+      before do
+        stub_request(:put, "#{store.url}/api/orders/123/accept").
+          with(headers: { 'Authorization': store.api_key, 'Accept': 'application/json' }, body: {'order_lines': [] } ).
+          to_return(status: 400, body: '{}', headers: {})
+      end
+
+      it 'correctly pushes the order to mirakl' do
+        expect { service.send(:accept_or_reject_order, JSON.parse({ "order_id": '123' ,"order_lines": [] }.to_json), true, store) }.to raise_exception
+      end
+    end
+
+    describe 'accept_or_reject_order_json' do
+      describe 'building the json' do
+        it 'processes true correctly' do
+          json_data = service.send(:accept_or_reject_order_json, JSON.parse({ "order_lines": [{ "order_line_id": "201807130411578146106997" }] }.to_json), true)
+          expect(json_data).to eq([{'accepted': true, 'id': '201807130411578146106997' }])
+        end
+
+        it 'processes false correctly' do
+          json_data = service.send(:accept_or_reject_order_json, JSON.parse({ "order_lines": [{ "order_line_id": "201807130411578146106997" }] }.to_json), false)
+          expect(json_data).to eq([{'accepted': false, 'id': '201807130411578146106997' }])
         end
       end
     end
