@@ -25,6 +25,7 @@
         <td><%= mirakl_store.name %></td>
         <td class="presentation"><%= mirakl_store.active %></td>
         <td class="actions actions-2 text-right">
+          <%= link_to "Refund Reasons", admin_mirakl_store_reason_mapper_path(mirakl_store), class: 'admin_edit_mirakl_store', no_text: true %>
           <%= link_to_edit(mirakl_store, class: 'admin_edit_mirakl_store', no_text: true) %>
           <%= link_to_delete(mirakl_store, no_text: true) %>
         </td>
