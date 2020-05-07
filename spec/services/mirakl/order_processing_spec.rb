@@ -12,7 +12,7 @@ module Mirakl
     let(:service) { described_class.new(service_arguments) }
 
     before do
-      stub_request(:get, "#{store.url}/api/orders?order_state_codes=WAITING_ACCEPTANCE?shop_id=#{store.shop_id}").
+      stub_request(:get, "#{store.url}/api/orders?order_state_codes=WAITING_ACCEPTANCE&shop_id=#{store.shop_id}").
         to_return(status: 200, body: '{ "orders": [] }', headers: {})
     end
 
@@ -81,7 +81,7 @@ module Mirakl
 
         describe 'when correct json is returned' do
           before do
-            stub_request(:get, "#{store.url}/api/orders?order_state_codes=WAITING_ACCEPTANCE?shop_id=#{store.shop_id}").
+            stub_request(:get, "#{store.url}/api/orders?order_state_codes=WAITING_ACCEPTANCE&shop_id=#{store.shop_id}").
               to_return(status: 200, body: '{ "orders": [{ "test_data": "testing" }] }', headers: {})
           end
 
@@ -93,7 +93,7 @@ module Mirakl
 
         describe 'when empty json is returned' do
           before do
-            stub_request(:get, "#{store.url}/api/orders?order_state_codes=WAITING_ACCEPTANCE?shop_id=#{store.shop_id}").
+            stub_request(:get, "#{store.url}/api/orders?order_state_codes=WAITING_ACCEPTANCE&shop_id=#{store.shop_id}").
               to_return(status: 200, body: '{ }', headers: {})
           end
 
@@ -105,7 +105,7 @@ module Mirakl
 
         describe 'when json is empty or a string' do
           before do
-            stub_request(:get, "#{store.url}/api/orders?order_state_codes=WAITING_ACCEPTANCE?shop_id=#{store.shop_id}").
+            stub_request(:get, "#{store.url}/api/orders?order_state_codes=WAITING_ACCEPTANCE&shop_id=#{store.shop_id}").
               to_return(status: 200, body: 'error string', headers: {})
           end
 
@@ -120,7 +120,7 @@ module Mirakl
         let!(:product) { create(:product_in_stock) }
         context 'when a single item is sent correctly' do
           before do
-            stub_request(:get, "#{store.url}/api/orders?order_state_codes=WAITING_ACCEPTANCE?shop_id=#{store.shop_id}").
+            stub_request(:get, "#{store.url}/api/orders?order_state_codes=WAITING_ACCEPTANCE&shop_id=#{store.shop_id}").
               to_return(status: 200, body: ({ "orders": [{ "order_lines": [{ "offer_sku": product.sku, "quantity": 1 }]}] }).to_json, headers: {})
           end
 

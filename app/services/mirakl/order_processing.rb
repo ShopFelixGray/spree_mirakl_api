@@ -24,7 +24,11 @@ module Mirakl
     def get_orders(store)
       request = SpreeMirakl::Request.new(store).get("/api/orders?order_state_codes=WAITING_ACCEPTANCE&shop_id=#{store.shop_id}")
       if request.success?
-        return JSON.parse(request.body, {symbolize_names: true})[:orders]
+        begin
+          return JSON.parse(request.body, {symbolize_names: true})[:orders]
+        rescue
+          raise ServiceError.new(["Error in getting Waiting Acceptance"])
+        end
       else
         raise ServiceError.new(["Error in getting Waiting Acceptance"])
       end
