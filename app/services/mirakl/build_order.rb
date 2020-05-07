@@ -48,12 +48,10 @@ module Mirakl
 
           @order = new_order
           unless new_order.complete?
-            puts new_order.errors.full_messages
             raise Exception.new("Could not complete order: #{new_order.errors.full_messages.try(:first)}")
           end
         end
       rescue Exception => e
-        puts e
         raise ServiceError.new(["Could not complete order: #{e.message}"])
       end
     end
