@@ -25,7 +25,6 @@ module Spree
     
     def cancel(mirakl_source, options={})
       return_json = []
-      binding.pry
       # Because spree doesn't use a reason code for cancel we just send the first reason 
       # TODO: Confirm that is okay
       transaction = Spree::MiraklTransaction.find_by(mirakl_order_id: mirakl_source)
