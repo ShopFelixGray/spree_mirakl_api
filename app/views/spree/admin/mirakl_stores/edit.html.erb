@@ -16,3 +16,15 @@
     </div>
   </div>
 <% end %>
+
+<h2><%= Spree.t(:refund_reason_mapping) %></h2>
+<%= form_tag(admin_mirakl_store_map_refunds_path(@mirakl_store),  method: :put) do |f| %>
+  <% Spree::RefundReason.all.each do |refund_reason| %>
+    <div>
+      <%= label_tag refund_reason.name %>
+      <%= select_tag refund_reason.id, options_for_select(@mirakl_store.mirakl_refund_reasons.all.collect{ |u| [u.label, u.id] }, @mirakl_store.mirakl_refund_reasons.joins(:refund_reasons).where(spree_refund_reasons: { id: refund_reason.id }).first.try(:id) ) %>
+    </div>
+  <% end %>
+  
+  <%= submit_tag "Submit", class: 'btn btn-primary' %>
+<% end %> 
