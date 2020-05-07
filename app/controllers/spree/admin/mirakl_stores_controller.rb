@@ -41,11 +41,17 @@ class Spree::Admin::MiraklStoresController < Spree::Admin::ResourceController
   end
 
   def map_refunds
-    @mirakl_refund_reason = Spree::MiraklRefundReason.find(params[:mirakl_refund_reason][:mirakl_reason_id])
-    if @mirakl_refund_reason.update(refund_reason_ids: params[:mirakl_refund_reason][:refund_reason_ids])
+    begin
+      Spree::RefundReason.all.each do |refund_reason|
+        if params[refund_reason.id.to_s]
+          @mirakl_refund_reason = Spree::MiraklRefundReason.find(params[refund_reason.id.to_s])
+          @mirakl_refund_reason.update(refund_reason_ids: [refund_reason.id])
+        end
+      end
       flash[:sucess] = "Updated"
       redirect_to edit_admin_mirakl_store_path(@mirakl_refund_reason.mirakl_store)
-    else
+    rescue => exception
+      flash[:error] = exception.message
       redirect_to :index
     end
   end
