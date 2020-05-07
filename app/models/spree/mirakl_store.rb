@@ -10,14 +10,14 @@ class Spree::MiraklStore < ActiveRecord::Base
   def pull_in_shop_info
     # TODO: Look to refactor if possible
     if self.shop_id.nil?
-      headers = { 'Authorization': api_key, 'Accept': 'application/json' }
-      request = HTTParty.get("#{url}/api/account", headers: headers)
+      mirakl_request = SpreeMirakl::Request.new(self)
+      request = mirakl_request.get("/api/account")
 
       if request.success?
         self.update(shop_id: JSON.parse(request.body)['shop_id'])
 
-        request = HTTParty.get("#{url}/api/reasons/REFUND", headers: headers)
-        if request.success?
+        reasons_request = mirakl_request.get("/api/reasons/REFUND?shop_id=#{self.shop_id}")
+        if reasons_request.success?
           refund_types = JSON.parse(request.body)['reasons']
 
           refund_types.each do |refund_type|
@@ -26,11 +26,39 @@ class Spree::MiraklStore < ActiveRecord::Base
             end
           end
         else
-          # TODO: ERROR
+          raise Exception.new('Issue syncing Refund Reasons. Please try again')
         end
       else
-        # TODO: ERROR
+        raise Exception.new('Issue getting shop ID. Please try again')
       end
     end
   end
+
+  def sync_reasons
+    mirakl_request = SpreeMirakl::Request.new(self)
+    reasons_request = mirakl_request.get("/api/reasons/REFUND?shop_id=#{self.shop_id}")
+    if reasons_request.success?
+      refund_types = JSON.parse(request.body)['reasons']
+
+      refund_types.each do |refund_type|
+        unless mirakl_refund_reasons.where(label: refund_type['label'], code: refund_type['code']).present?
+          Spree::MiraklRefundReason.create!(label: refund_type['label'], code: refund_type['code'], mirakl_store: self)
+        end
+      end
+    else
+      raise Exception.new('Issue syncing Refund Reasons. Please try again')
+    end
+  end
+
+  def sync_shop_id
+    mirakl_request = SpreeMirakl::Request.new(self)
+    request = mirakl_request.get("/api/account")
+
+    if request.success?
+      self.update(shop_id: JSON.parse(request.body)['shop_id'])
+    else
+      raise Exception.new('Issue getting shop ID. Please try again')
+    end
+  end
+
 end

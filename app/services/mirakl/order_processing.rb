@@ -22,8 +22,7 @@ module Mirakl
     end
 
     def get_orders(store)
-      headers = { 'Authorization': store.api_key, 'Accept': 'application/json' }
-      request = HTTParty.get("#{store.url}/api/orders?order_state_codes=WAITING_ACCEPTANCE", headers: headers)
+      request = SpreeMirakl::Request.new(store).get("/api/orders?order_state_codes=WAITING_ACCEPTANCE?shop_id=#{store.shop_id}")
       begin
         return JSON.parse(request.body)['orders']
       rescue
@@ -49,11 +48,7 @@ module Mirakl
     end
 
     def accept_or_reject_order(order, can_fulfill, store)
-      headers = { 'Authorization': store.api_key, 'Accept': 'application/json', 'Content-Type': 'application/json' }
-      request = HTTParty.put("#{store.url}/api/orders/#{order['order_id']}/accept", 
-                  body: ({ 'order_lines': accept_or_reject_order_json(order, can_fulfill) }).to_json, 
-                  headers: headers
-                )
+      request = SpreeMirakl::Request.new(store).put("/api/orders/#{order['order_id']}/accept?shop_id=#{store.shop_id}", ({ 'order_lines': accept_or_reject_order_json(order, can_fulfill) }).to_json)
 
       unless request.success?
         raise ServiceError.new(["Issue Processing #{order['order_id']} can fulfill but request issue"])

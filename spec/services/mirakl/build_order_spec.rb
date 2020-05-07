@@ -102,8 +102,7 @@ module Mirakl
       Spree::State.create!(name: "Washington D.C", abbr: "DC", country: Spree::Country.first)
       Spree::ZoneMember.create!(zoneable_id: Spree::Country.first.id, zone: Spree::Zone.first, zoneable: Spree::Country.first)
 
-      stub_request(:get, "#{store.url}/api/orders?order_ids=test").
-        with(headers: { 'Authorization': store.api_key, 'Accept': 'application/json' }).
+      stub_request(:get, "#{store.url}/api/orders?order_ids=test&shop_id=#{store.shop_id}").
         to_return(status: 200, body: order_data, headers: {})
     end
 
@@ -164,8 +163,7 @@ module Mirakl
 
         describe 'when there is an error' do
           before do
-            stub_request(:get, "#{store.url}/api/orders?order_ids=test").
-              with(headers: { 'Authorization': store.api_key, 'Accept': 'application/json' }).
+            stub_request(:get, "#{store.url}/api/orders?order_ids=test&shop_id=#{store.shop_id}").
               to_return(status: 400, body: '{}', headers: {})
           end
 
@@ -183,6 +181,10 @@ module Mirakl
 
         it 'creates a transaction' do
           expect{service.send(:build_order_for_user, JSON.parse(order_data)['orders'][0], store)}.to change{Spree::MiraklTransaction.count}.by(1)
+        end
+
+        it 'creates 2 addresses' do
+          expect{service.send(:build_order_for_user, JSON.parse(order_data)['orders'][0], store)}.to change{Spree::Address.count}.by(2)
         end
 
         it 'sets the order channel correctly' do
