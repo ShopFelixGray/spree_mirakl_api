@@ -9,6 +9,7 @@ class SpreeMirakl::Request
   def get(path)
     headers = { 'Authorization': @store.api_key, 'Accept': 'application/json' }
     @request = HTTParty.get("#{@store.url}#{path}", headers: headers)
+    @request
   end
 
   def put(path, data)
