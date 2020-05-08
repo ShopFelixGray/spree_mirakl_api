@@ -39,7 +39,7 @@ module Mirakl
       orders.each do |order|
         service = Mirakl::BuildOrder.new({mirakl_order_id: order[:order_id], store: store})
         unless service.call
-          raise ServiceError.new(["Error processing order: #{order[:order_id]}"])
+          raise ServiceError.new(["Error processing order: #{order[:order_id]}", service.errors])
         end
       end
     end
