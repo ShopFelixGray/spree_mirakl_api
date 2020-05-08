@@ -25,7 +25,6 @@ module Mirakl
     end
 
     def get_order(mirakl_order_id, store)
-      puts "HERE HERE"
       request = SpreeMirakl::Request.new(store).get("/api/orders?order_ids=#{mirakl_order_id}&shop_id=#{store.shop_id}")
       if request.success?
         return JSON.parse(request.body, {symbolize_names: true})[:orders][0]
@@ -43,7 +42,6 @@ module Mirakl
           new_order = add_line_items(new_order, order_data[:order_lines])
           new_order.billing_address = build_address(order_data[:customer][:billing_address], new_order.user)
           new_order.ship_address = build_address(order_data[:customer][:shipping_address], new_order.user)
-
           create_payment(new_order, order_data[:total_price], order_data[:order_id], store)
 
           while order_next(new_order);end
