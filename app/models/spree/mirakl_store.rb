@@ -40,7 +40,7 @@ class Spree::MiraklStore < ActiveRecord::Base
   def sync_reasons
     reasons_request = SpreeMirakl::Request.new(self).get("/api/reasons/REFUND?shop_id=#{self.shop_id}")
     if reasons_request.success?
-      refund_types = JSON.parse(request.body, {symbolize_names: true})[:reasons]
+      refund_types = JSON.parse(reasons_request.body, {symbolize_names: true})[:reasons]
 
       refund_types.each do |refund_type|
         unless mirakl_refund_reasons.where(label: refund_type[:label], code: refund_type[:code]).present?
