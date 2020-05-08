@@ -25,11 +25,13 @@ module ActiveMerchant #:nodoc:
       end
 
       def void(mirakl_source, options = {})
-        ActiveMerchant::Billing::Response.new(true, "", {}, {})
+        provider.cancel(mirakl_source, options = {})
+        # ActiveMerchant::Billing::Response.new(true, "", {}, {})
       end
 
       def refund(money, mirakl_source, options = {})
-        ActiveMerchant::Billing::Response.new(true, "", {}, {})
+        provider.credit(money, mirakl_source, options = {})
+        # ActiveMerchant::Billing::Response.new(true, "", {}, {})
       end
 
       def credit(money, mirakl_source, options = {})
