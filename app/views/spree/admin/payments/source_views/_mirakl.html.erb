@@ -8,6 +8,10 @@
         <dt><%= Spree.t(:state, :scope => :mirakl) %>:</dt>
         <dd><%= payment.state.titleize %></dd>
       </dl>
+      <dl>
+        <dt><%= Spree.t(:mirakl_store, :scope => :mirakl) %>:</dt>
+        <dd><%= payment.source.try(:mirakl_store).try(:name) %>
+      </dl>
     </div>
   </div>
 </fieldset> 
