@@ -9,7 +9,7 @@ Spree::Shipment.class_eval do
     if order.channel == 'mirakl'
       store = order.mirakl_transaction.mirakl_store
       order_id = order.mirakl_transaction.mirakl_order_id
-      MiraklShipJob.perform_later store, order_id, shipping_method, tracking_url
+      MiraklShipJob.perform_later store.id, order_id, self.id
     end
   end
 end
