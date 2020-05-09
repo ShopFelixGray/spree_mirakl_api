@@ -1,7 +1,12 @@
 SpreeMiraklApi
 ==============
 
-Introduction goes here.
+Spree intergration for Mirakl API. Currently only processes orders and brings them into the system and allows you to ship.
+Each Mirakl Store Requires a user to be assigned to it. All orders from that store will be placed under that user.
+
+## TODO
+
+1. Inventory update
 
 ## Installation
 
@@ -50,4 +55,4 @@ If you'd like to contribute, please take a look at the
 [instructions](CONTRIBUTING.md) for installing dependencies and crafting a good
 pull request.
 
-Copyright (c) 2020 [name of extension creator], released under the New BSD License
+Copyright (c) 2020 Felix Gray, released under the New BSD License
