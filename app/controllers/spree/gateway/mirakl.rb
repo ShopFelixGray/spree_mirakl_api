@@ -31,9 +31,9 @@ module Spree
         return_json << {  'amount': line_item.amount, 
           'order_line_id': mirakl_order_line.mirakl_order_line_id, 
           'shipping_amount': 0,
-          'taxes': taxes_json(mirakl_order_line.mirakl_order_line_taxes.taxes, 1),
+          'taxes': taxes_json(mirakl_order_line.mirakl_order_line_taxes.taxes),
           'reason_code': transaction.mirakl_store.mirakl_refund_reasons.first.code,
-          'shipping_taxes': taxes_json(mirakl_order_line.mirakl_order_line_taxes.shipping_taxes, 1),
+          'shipping_taxes': taxes_json(mirakl_order_line.mirakl_order_line_taxes.shipping_taxes),
           'quantity': line_item.quantity,
           'currency_iso_code': transaction.order.currency
         }
@@ -50,16 +50,17 @@ module Spree
       end
     end
 
-    def taxes_json(taxes, quantity)
+    def taxes_json(taxes)
       json_data = []
       taxes.each do |tax|
         # We divide by quantity causes taxes come over on a per line item basis. If an order has 2 and we return one only half taxes should go back
         json_data << {
-          'amount': tax.amount.to_f/quantity,
+          'amount': tax.amount.to_f,
           'code': tax.code
         }
       end
       return json_data
     end
+
   end
 end
