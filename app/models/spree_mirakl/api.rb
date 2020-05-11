@@ -26,12 +26,8 @@ class SpreeMirakl::Api
     @response = SpreeMirakl::Request.new(@store).get("/api/orders?order_ids=#{mirakl_order_id}&shop_id=#{@store.shop_id}")
   end
 
-  def shipping_orders
-    @response = SpreeMirakl::Request.new(@store).get("/api/orders?order_state_codes=SHIPPING&shop_id=#{@store.shop_id}")
-  end
-
-  def waiting_acceptance
-    @response = SpreeMirakl::Request.new(@store).get("/api/orders?order_state_codes=WAITING_ACCEPTANCE&shop_id=#{@store.shop_id}")
+  def get_order_state(state)
+    @response = SpreeMirakl::Request.new(@store).get("/api/orders?order_state_codes=#{state}&shop_id=#{@store.shop_id}")
   end
 
   def accept_order(mirakl_order_id, json_data)
