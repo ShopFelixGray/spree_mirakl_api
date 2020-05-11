@@ -4,6 +4,7 @@
 en:
   spree:
     mirakl_stores: Mirakl Stores
+    mirakl_store: Mirakl Store
     new_mirakl_store: New Mirakl Store
     api_key: API Key
     url: URL

@@ -24,12 +24,8 @@ module ActiveMerchant #:nodoc:
         ActiveMerchant::Billing::Response.new(true, "", {}, {})
       end
 
-      def void(mirakl_source, options = {})
-        ActiveMerchant::Billing::Response.new(true, "", {}, {})
-      end
-
       def refund(money, mirakl_source, options = {})
-        ActiveMerchant::Billing::Response.new(true, "", {}, {})
+        credit(money, mirakl_source, options = {})
       end
 
       def credit(money, mirakl_source, options = {})
