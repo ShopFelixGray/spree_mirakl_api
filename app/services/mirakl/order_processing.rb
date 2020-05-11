@@ -22,7 +22,7 @@ module Mirakl
     end
 
     def get_orders(store)
-      request = SpreeMirakl::Request.new(store).get("/api/orders?order_state_codes=WAITING_ACCEPTANCE&shop_id=#{store.shop_id}")
+      request = SpreeMirakl::Api.new(store).waiting_acceptance()
       if request.success?
         begin
           return JSON.parse(request.body, {symbolize_names: true})[:orders]
@@ -51,7 +51,7 @@ module Mirakl
     end
 
     def accept_or_reject_order(order, can_fulfill, store)
-      request = SpreeMirakl::Request.new(store).put("/api/orders/#{order[:order_id]}/accept?shop_id=#{store.shop_id}", ({ 'order_lines': accept_or_reject_order_json(order, can_fulfill) }).to_json)
+      request = SpreeMirakl::Api.new(store).accept_order(order[:order_id], accept_or_reject_order_json(order, can_fulfill))
 
       unless request.success?
         raise ServiceError.new(["Issue Processing #{order[:order_id]} can fulfill but request issue"])

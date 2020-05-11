@@ -52,7 +52,7 @@ module ActiveMerchant #:nodoc:
                           }
         end
         # NOTE WE NEED SHOP ID NEED TO LOOK INTO WHERE THAT IS
-        request = SpreeMirakl::Request.new(transaction.mirakl_store).put("/api/orders/refund?shop_id=#{transaction.mirakl_store.shop_id}", ({ 'refunds': return_json }).to_json)
+        request = SpreeMirakl::Api.new(transaction.mirakl_store).refund(return_json)
 
         # We have to do it this way because if it is a success parsed response will have refunds
         # if it fails we get message

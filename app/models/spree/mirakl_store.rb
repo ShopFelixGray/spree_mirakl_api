@@ -12,13 +12,13 @@ class Spree::MiraklStore < ActiveRecord::Base
   def pull_in_shop_info
     # TODO: Look to refactor if possible
     if self.shop_id.nil?
-      mirakl_request = SpreeMirakl::Request.new(self)
-      request = mirakl_request.get("/api/account")
+      mirakl_request = SpreeMirakl::Api.new(self)
+      request = mirakl_request.account()
 
       if request.success?
         self.update(shop_id: JSON.parse(request.body, {symbolize_names: true})[:shop_id])
 
-        reasons_request = mirakl_request.get("/api/reasons/REFUND?shop_id=#{self.shop_id}")
+        reasons_request = mirakl_request.refund_reasons()
         if reasons_request.success?
           refund_types = JSON.parse(reasons_request.body, {symbolize_names: true})[:reasons]
 
@@ -38,7 +38,7 @@ class Spree::MiraklStore < ActiveRecord::Base
 
   # TODO: Add these as buttons to call on the edit page for if there is ever an error or issue
   def sync_reasons
-    reasons_request = SpreeMirakl::Request.new(self).get("/api/reasons/REFUND?shop_id=#{self.shop_id}")
+    reasons_request = SpreeMirakl::Api.new(self).refund_reasons()
     if reasons_request.success?
       refund_types = JSON.parse(reasons_request.body, {symbolize_names: true})[:reasons]
 
@@ -53,7 +53,7 @@ class Spree::MiraklStore < ActiveRecord::Base
   end
 
   def sync_shop_id
-    request = SpreeMirakl::Request.new(self).get("/api/account")
+    request = SpreeMirakl::Api.new(self).account()
 
     if request.success?
       self.update(shop_id: JSON.parse(request.body, {symbolize_names: true})[:shop_id])
