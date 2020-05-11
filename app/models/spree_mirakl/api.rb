@@ -42,4 +42,8 @@ class SpreeMirakl::Api
     @response = SpreeMirakl::Request.new(@store).put("/api/orders/refund?shop_id=#{@store.shop_id}", ({ 'refunds': return_json }).to_json)
   end
 
+  def offers
+    @response = SpreeMirakl::Request.new(@store).get("/api/offers?shop_id=#{@store.shop_id}")
+  end
+
 end
