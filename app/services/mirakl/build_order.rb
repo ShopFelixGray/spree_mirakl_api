@@ -25,7 +25,7 @@ module Mirakl
     end
 
     def get_order(mirakl_order_id, store)
-      request = SpreeMirakl::Request.new(store).get("/api/orders?order_ids=#{mirakl_order_id}&shop_id=#{store.shop_id}")
+      request = SpreeMirakl::Api.new(store).get_order(mirakl_order_id)
       if request.success?
         return JSON.parse(request.body, {symbolize_names: true})[:orders][0]
       else
