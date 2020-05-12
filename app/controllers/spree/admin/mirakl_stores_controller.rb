@@ -48,6 +48,7 @@ class Spree::Admin::MiraklStoresController < Spree::Admin::ResourceController
 
   def reason_mapper
     @mirakl_store = Spree::MiraklStore.includes(mirakl_refund_reasons: [:refund_reasons]).find(params[:mirakl_store_id])
+    @mirakl_store.sync_reasons
   end
 
   def map_refunds
@@ -63,18 +64,6 @@ class Spree::Admin::MiraklStoresController < Spree::Admin::ResourceController
     rescue => exception
       flash[:error] = exception.message
       redirect_to :index
-    end
-  end
-
-  def refresh_refund_reasons
-    begin
-      @mirakl_store = Spree::MiraklStore.find(params[:mirakl_store_id])
-      @mirakl_store.sync_reasons
-      flash[:notice] = "Updated"
-      redirect_to admin_mirakl_stores_path
-    rescue => exception
-      flash[:error] = exception.message
-      redirect_to admin_mirakl_stores_path
     end
   end
 
