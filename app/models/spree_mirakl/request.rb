@@ -18,6 +18,12 @@ class SpreeMirakl::Request
     @request
   end
 
+  def post(path, data)
+    headers = { 'Authorization': @store.api_key, 'Accept': 'application/json', 'Content-Type': 'application/json' }
+    @request = HTTParty.post("#{@store.url}#{path}", body: data, headers: headers)
+    @request
+  end
+
   def body
     @request.body
   end
