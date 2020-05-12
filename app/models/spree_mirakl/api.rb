@@ -46,4 +46,12 @@ class SpreeMirakl::Api
     @response = SpreeMirakl::Request.new(@store).get("/api/offers?shop_id=#{@store.shop_id}")
   end
 
+  def update_offers(offer_json)
+    @response = SpreeMirakl::Request.new(@store).post("/api/offers?shop_id=#{@store.shop_id}", ({ 'offers': offer_json }).to_json)
+  end
+
+  def get_offer(offer_id)
+    @response = SpreeMirakl::Request.new(@store).get("/api/offers/#{offer_id}?shop_id=#{@store.shop_id}")
+  end
+
 end

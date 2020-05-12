@@ -36,7 +36,6 @@ class Spree::MiraklStore < ActiveRecord::Base
     end
   end
 
-  # TODO: Add these as buttons to call on the edit page for if there is ever an error or issue
   def sync_reasons
     reasons_request = SpreeMirakl::Api.new(self).refund_reasons()
     if reasons_request.success?

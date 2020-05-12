@@ -13,5 +13,9 @@
     <% end %>
   </table>
   
-  <%= submit_tag "Submit", class: 'btn btn-primary' %>
+  <div class="form-actions" data-hook="buttons">
+    <%= button Spree.t('actions.update'), 'save' %>
+    <span class="or"><%= Spree.t(:or) %></span>
+    <%= button_link_to Spree.t('actions.cancel'), spree.admin_mirakl_stores_path(), id: 'cancel_link', icon: 'delete' %>
+  </div>
 <% end %> 
