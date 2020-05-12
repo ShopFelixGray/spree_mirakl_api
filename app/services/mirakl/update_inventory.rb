@@ -53,7 +53,7 @@ module Mirakl
               "product_id": offer_data[:product_id],
               "product_id_type": offer_data[:product_id_type],
               "product_tax_code": offer_data[:product_tax_code],
-              "quantity": variant.total_on_hand,
+              "quantity": variant.quantity_check,
               "shop_sku": offer_data[:shop_sku],
               "state_code": offer_data[:state_code],
               "update_delete": "update"
