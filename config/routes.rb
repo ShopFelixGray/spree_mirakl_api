@@ -2,7 +2,7 @@ Spree::Core::Engine.routes.draw do
   # Add your extension routes here
   namespace :admin do
     resources :mirakl_stores do
-      get :refresh_refunds
+      get :refresh_refund_reasons
       get :refresh_inventory
       get :reason_mapper
       put :map_refunds

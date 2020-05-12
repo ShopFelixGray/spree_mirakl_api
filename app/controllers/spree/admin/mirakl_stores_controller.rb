@@ -66,7 +66,7 @@ class Spree::Admin::MiraklStoresController < Spree::Admin::ResourceController
     end
   end
 
-  def refresh_refunds
+  def refresh_refund_reasons
     begin
       @mirakl_store = Spree::MiraklStore.find(params[:mirakl_store_id])
       @mirakl_store.sync_reasons
