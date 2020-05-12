@@ -42,7 +42,8 @@ To pull in the orders a cron job is required. There is 3 different services that
       logger.debug service.errors
       Rollbar.error(Exception.new(service.errors.to_s))
     end
-  end```
+  end
+  ```
 
   Service.errors will return an array of errors and call will return false if there is any errors
 
@@ -56,7 +57,8 @@ To pull in the orders a cron job is required. There is 3 different services that
       logger.debug service.errors
       Rollbar.error(Exception.new(service.errors.to_s))
     end
-  end```
+  end
+  ```
 
 3. Mirakl::UpdateInventory.new({store: store})
 
@@ -69,7 +71,8 @@ To pull in the orders a cron job is required. There is 3 different services that
         raise Exception.new("Issue with updating inventory for store: #{store.shop_id}")
       end
     end
-  end```
+  end
+  ```
 
 ## Testing
 
