@@ -19,6 +19,7 @@ Gem::Specification.new do |s|
   s.requirements << 'none'
 
   s.add_dependency 'spree_core', '~> 3.1.14'
+  s.add_dependency 'httparty' -> '~> 0.15.6'
 
   s.add_development_dependency 'capybara', '~> 2.6'
   s.add_development_dependency 'coffee-rails'
