@@ -4,10 +4,6 @@ SpreeMiraklApi
 Spree intergration for Mirakl API. Currently only processes orders and brings them into the system and allows you to ship.
 Each Mirakl Store Requires a user to be assigned to it. All orders from that store will be placed under that user.
 
-## TODO
-
-1. Inventory update
-
 ## Installation
 
 1. Add this extension to your Gemfile with this line:
@@ -31,6 +27,49 @@ Each Mirakl Store Requires a user to be assigned to it. All orders from that sto
 4. Restart your server
 
   If your server was running, restart it so that it can find the assets properly.
+
+## Setup Cron Jobs
+
+To pull in the orders a cron job is required. There is 3 different services that should be run separately of each other.
+
+1. Mirakl::OrderProcessing.new(stores: Spree::MiraklStore.active)
+
+  This service gets all orders waiting acceptance and checks if they can be fully accepted. If one line item cant be meet the whole order is rejected. An example worker for this would be
+
+  ```def perform
+    service = Mirakl::OrderProcessing.new(stores: Spree::MiraklStore.active)
+    unless service.call
+      logger.debug service.errors
+      Rollbar.error(Exception.new(service.errors.to_s))
+    end
+  end```
+
+  Service.errors will return an array of errors and call will return false if there is any errors
+
+2. Mirakl::GetShippingOrders.new({stores: Spree::MiraklStore.active})
+
+  This service takes all orders that are ready to be shipped and pulls them into spree. An example worker for this would be 
+
+  ```def perform
+    service = Mirakl::GetShippingOrders.new({stores: Spree::MiraklStore.active})
+    unless service.call
+      logger.debug service.errors
+      Rollbar.error(Exception.new(service.errors.to_s))
+    end
+  end```
+
+3. Mirakl::UpdateInventory.new({store: store})
+
+  This service syncs a single stores inventory. It takes a single store because it is reused on index. It will use the spree call total_on_hand for a given sku to update Mirakls offerings. An example for a worker would be
+
+  ```def perform
+    Spree::MiraklStore.active.each do |store|
+      service = Mirakl::UpdateInventory.new({store: store})
+      unless service.call
+        raise Exception.new("Issue with updating inventory for store: #{store.shop_id}")
+      end
+    end
+  end```
 
 ## Testing
 
