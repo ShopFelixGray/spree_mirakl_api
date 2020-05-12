@@ -22,7 +22,7 @@ module Mirakl
     end
 
     def get_ready_orders(store)
-      request = SpreeMirakl::Api.new(store).shipping_orders()
+      request = SpreeMirakl::Api.new(store).get_order_state("SHIPPING")
       if request.success?
         begin
           return JSON.parse(request.body, {symbolize_names: true})[:orders]

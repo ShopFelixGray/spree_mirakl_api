@@ -8,7 +8,7 @@ Each Mirakl Store Requires a user to be assigned to it. All orders from that sto
 
 1. Add this extension to your Gemfile with this line:
   ```ruby
-  gem 'spree_mirakl_api', github: '[your-github-handle]/spree_mirakl_api', branch: 'X-X-stable'
+  gem 'spree_mirakl_api', github: 'https://github.com/ShopFelixGray/spree_mirakl_api', branch: 'master'
   ```
 
   The `branch` option is important: it must match the version of Spree you're using.
@@ -97,4 +97,4 @@ If you'd like to contribute, please take a look at the
 [instructions](CONTRIBUTING.md) for installing dependencies and crafting a good
 pull request.
 
-Copyright (c) 2020 Felix Gray, released under the New BSD License
+Copyright (c) 2020 Mike Walters, released under the New BSD License

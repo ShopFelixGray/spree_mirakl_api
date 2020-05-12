@@ -22,7 +22,7 @@ module Mirakl
     end
 
     def get_orders(store)
-      request = SpreeMirakl::Api.new(store).waiting_acceptance()
+      request = SpreeMirakl::Api.new(store).get_order_state("WAITING_ACCEPTANCE")
       if request.success?
         begin
           return JSON.parse(request.body, {symbolize_names: true})[:orders]
