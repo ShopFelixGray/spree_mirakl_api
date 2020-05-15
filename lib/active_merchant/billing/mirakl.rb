@@ -35,12 +35,12 @@ module ActiveMerchant #:nodoc:
         return ActiveMerchant::Billing::Response.new(false, "Reimburstment Required", {}, {}) unless refund.reimbursement.present? || transaction.present?
         refund.reimbursement.customer_return.return_items.each do |return_item|
           line_item_quantity = return_item.inventory_unit.line_item.quantity
-          mirakl_order_line = line_item.mirakl_order_line
+          mirakl_order_line = return_item.inventory_unit.line_item.mirakl_order_line
           # Look to refactor refund reasons code
-          return_json << {  'amount': return_item.amount, 
+          return_json << {  'amount': return_item.total, 
                             'order_line_id': mirakl_order_line.mirakl_order_line_id, 
                             'shipping_amount': 0, 
-                            'reason_code': mirakl_order_line.mirakl_store.mirakl_refund_reasons.joins(:refund_reasons).where(spree_refund_reasons: { id: refund.refund_reason_id }).first.try(:code) || mirakl_order_line.mirakl_store.mirakl_refund_reasons.first.code,
+                            'reason_code': transaction.mirakl_store.mirakl_refund_reasons.joins(:refund_reasons).where(spree_refund_reasons: { id: refund.refund_reason_id }).first.try(:code) || transaction.mirakl_store.mirakl_refund_reasons.first.code,
                             'taxes': taxes_json(mirakl_order_line.mirakl_order_line_taxes.taxes, line_item_quantity),
                             'shipping_taxes': taxes_json(mirakl_order_line.mirakl_order_line_taxes.shipping_taxes, line_item_quantity),
                             'quantity': 1,
