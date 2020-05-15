@@ -24,7 +24,7 @@ module Mirakl
       variant = Spree::Variant.find_by(sku: sku)
 
       if variant.present?
-        @can_fulfill = (quantity <= variant.quantity_check && variant.available?)
+        @can_fulfill = (quantity <= variant.quantity_check)
       else
         @can_fulfill = false
       end
