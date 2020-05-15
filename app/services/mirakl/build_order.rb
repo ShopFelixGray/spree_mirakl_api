@@ -42,9 +42,13 @@ module Mirakl
           new_order = add_line_items(new_order, order_data[:order_lines])
           new_order.billing_address = build_address(order_data[:customer][:billing_address], new_order.user)
           new_order.ship_address = build_address(order_data[:customer][:shipping_address], new_order.user)
-          create_payment(new_order, new_order.total, order_data[:order_id], store)
+          
 
-          while order_next(new_order);end
+          while order_next(new_order)
+            if new_order.state == "payment"
+              create_payment(new_order, new_order.total, order_data[:order_id], store)
+            end
+          end
 
           @order = new_order
           unless new_order.complete?
