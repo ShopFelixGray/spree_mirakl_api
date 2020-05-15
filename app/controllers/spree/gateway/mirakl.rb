@@ -39,8 +39,7 @@ module Spree
         }
       end
   
-      request = SpreeMirakl::Request.new(transaction.mirakl_store).put("/api/orders/refund?shop_id=#{transaction.mirakl_store.shop_id}", ({ 'refunds': return_json }).to_json)
-  
+      request = SpreeMirakl::Api.new(transaction.mirakl_store).cancel(return_json)
       # We have to do it this way because if it is a success parsed response will have refunds
       # if it fails we get message
       if request.success?
