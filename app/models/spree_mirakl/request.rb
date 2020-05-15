@@ -1,3 +1,5 @@
+require 'httparty'
+
 class SpreeMirakl::Request
   attr_reader :request, :store
 
