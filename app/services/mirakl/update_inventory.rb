@@ -59,17 +59,17 @@ module Mirakl
               "update_delete": "update"
             }
           else
-            variants_not_found << offer[:shop_sku]
+            Rails.logger.error "Couldn't find variant sku: #{offer_data[:shop_sku]}"
           end
         else
-          variants_not_found << offer[:shop_sku]
+          Rails.logger.error "Couldn't find variant sku: #{offer[:shop_sku]}"
         end
       end
 
       response = SpreeMirakl::Api.new(@store).update_offers(update_json)
 
-      if variants_not_found.present?
-        raise ServiceError.new(["Couldnt find variant skus: #{variants_not_found.to_s}"])
+      unless response.success?
+        raise ServiceError.new(["Issue updating inventory: #{response}"])
       end
     end
 
