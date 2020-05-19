@@ -1,6 +1,7 @@
 class Spree::MiraklStore < ActiveRecord::Base
   belongs_to :user
   has_many :mirakl_refund_reasons, dependent: :destroy
+  has_many :mirakl_transactions
 
   validates :name, :api_key, :url, :user_id, presence: true
   validates :name, :api_key, :url, :uniqueness => {:case_sensitive => false}
@@ -8,6 +9,15 @@ class Spree::MiraklStore < ActiveRecord::Base
   after_create :pull_in_shop_info
 
   scope :active, -> { where(active: true) }
+
+  before_destroy :check_for_orders, prepend: true
+
+  def check_for_orders
+    if self.mirakl_transactions.present?
+      errors[:base] << Spree.t(:mirakl_store_cant_be_destroyed)
+      return false
+    end
+  end
 
   def pull_in_shop_info
     # TODO: Look to refactor if possible
