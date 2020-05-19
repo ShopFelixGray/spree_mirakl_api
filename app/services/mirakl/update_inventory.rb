@@ -59,6 +59,7 @@ module Mirakl
               "update_delete": "update"
             }
           else
+            # Update the item to out of stock because we dont have the SKU and throw an error
             update_json << {
               "all_prices": offer_data[:all_prices],
               "allow_quote_requests": offer_data[:allow_quote_requests],
