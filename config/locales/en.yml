@@ -14,3 +14,4 @@ en:
     refund_reason_mapping: Refund Reason Mapping
     refresh_inventory: Refresh Inventory Count
     sync_refund_reasons: ReSync Refund Reasons
+    mirakl_store_cant_be_destroyed: Cannot destroy. Store has orders. Please switch to inactive instead to turn off the store

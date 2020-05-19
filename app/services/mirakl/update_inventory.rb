@@ -32,10 +32,10 @@ module Mirakl
       end
     end
 
-    def update_inventory(offer_data)
+    def update_inventory(offers_data)
       update_json = []
       variants_not_found = []
-      offer_data.each do |offer|
+      offers_data.each do |offer|
         # We need to request offer_data cause the index wont include product_tax_code
         response = SpreeMirakl::Api.new(@store).get_offer(offer[:offer_id])
         if response.success?
@@ -59,17 +59,34 @@ module Mirakl
               "update_delete": "update"
             }
           else
-            variants_not_found << offer[:shop_sku]
+            # Update the item to out of stock because we dont have the SKU and throw an error
+            update_json << {
+              "all_prices": offer_data[:all_prices],
+              "allow_quote_requests": offer_data[:allow_quote_requests],
+              "available_ended": offer_data[:available_ended],
+              "available_started": offer_data[:available_started],
+              "description": offer_data[:description],
+              "internal_description": offer_data[:internal_description],
+              "price": 95.00,
+              "product_id": offer_data[:product_id],
+              "product_id_type": offer_data[:product_id_type],
+              "product_tax_code": offer_data[:product_tax_code],
+              "quantity": 0,
+              "shop_sku": offer_data[:shop_sku],
+              "state_code": offer_data[:state_code],
+              "update_delete": "update"
+            }
+            Rails.logger.error "Couldn't find variant sku: #{offer_data[:shop_sku]}"
           end
         else
-          variants_not_found << offer[:shop_sku]
+          Rails.logger.error "Couldn't find variant sku: #{offer[:shop_sku]}"
         end
       end
 
       response = SpreeMirakl::Api.new(@store).update_offers(update_json)
 
-      if variants_not_found.present?
-        raise ServiceError.new(["Couldnt find variant skus: #{variants_not_found.to_s}"])
+      unless response.success?
+        raise ServiceError.new(["Issue updating inventory: #{response}"])
       end
     end
 
