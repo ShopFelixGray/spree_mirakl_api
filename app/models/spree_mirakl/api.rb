@@ -27,7 +27,7 @@ class SpreeMirakl::Api
   end
 
   def get_order_state(state)
-    @response = SpreeMirakl::Request.new(@store).get("/api/orders?order_state_codes=#{state}&shop_id=#{@store.shop_id}")
+    @response = SpreeMirakl::Request.new(@store).get("/api/orders?order_state_codes=#{state}&shop_id=#{@store.shop_id}&max=20&limit=20")
   end
 
   def accept_order(mirakl_order_id, json_data)
@@ -43,7 +43,7 @@ class SpreeMirakl::Api
   end
 
   def offers
-    @response = SpreeMirakl::Request.new(@store).get("/api/offers?shop_id=#{@store.shop_id}")
+    @response = SpreeMirakl::Request.new(@store).get("/api/offers?shop_id=#{@store.shop_id}&max=100&limit=100")
   end
 
   def update_offers(offer_json)
