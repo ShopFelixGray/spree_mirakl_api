@@ -23,14 +23,18 @@ module Spree
     
     def cancel(mirakl_source, options={})
       transaction = Spree::MiraklTransaction.find_by(mirakl_order_id: mirakl_source)
-  
-      request = SpreeMirakl::Api.new(transaction.mirakl_store).cancel(transaction.mirakl_order_id)
-      # We have to do it this way because if it is a success parsed response will have refunds
-      # if it fails we get message
-      if request.success?
-        ActiveMerchant::Billing::Response.new(true, "", {}, {})
-      else 
-        ActiveMerchant::Billing::Response.new(false, request.parsed_response['message'][0...255], {}, {})
+
+      if transaction.present?
+        request = SpreeMirakl::Api.new(transaction.mirakl_store).cancel(transaction.mirakl_order_id)
+        # We have to do it this way because if it is a success parsed response will have refunds
+        # if it fails we get message
+        if request.success?
+          ActiveMerchant::Billing::Response.new(true, "", {}, {})
+        else 
+          ActiveMerchant::Billing::Response.new(false, request.parsed_response['message'][0...255], {}, {})
+        end
+      else
+        return ActiveMerchant::Billing::Response.new(false, Spree.t(:mirakl_transaction_not_found), {}, {})
       end
     end
 
