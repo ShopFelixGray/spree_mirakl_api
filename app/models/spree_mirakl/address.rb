@@ -30,7 +30,7 @@ module SpreeMirakl
 
       # Check if we are using spree address book
       if `gem list`.include? 'spree_address_book'
-        @address_data.merge({ user: @user, default: false})
+        @address_data = @address_data.merge({ user: @user, default: false})
       end
 
       @address = Spree::Address.create!(@address_data)
