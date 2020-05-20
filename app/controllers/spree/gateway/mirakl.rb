@@ -34,7 +34,7 @@ module Spree
           ActiveMerchant::Billing::Response.new(false, request.parsed_response['message'][0...255], {}, {})
         end
       else
-        return ActiveMerchant::Billing::Response.new(false, Spree.t(:mirakl_transaction_not_found), {}, {})
+        ActiveMerchant::Billing::Response.new(false, Spree.t(:mirakl_transaction_not_found), {}, {})
       end
     end
 
