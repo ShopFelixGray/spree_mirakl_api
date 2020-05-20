@@ -22,7 +22,7 @@ module Mirakl
     end
 
     def get_orders(store)
-      request = SpreeMirakl::Api.new(store).get_order_state("WAITING_ACCEPTANCE")
+      request = SpreeMirakl::Api.new(store).get_order_state("WAITING_ACCEPTANCE,SHIPPING")
       if request.success?
         begin
           return JSON.parse(request.body, {symbolize_names: true})[:orders]
@@ -36,24 +36,36 @@ module Mirakl
 
     def process_orders(orders, store)
       orders.each do |order|
-        can_fulfill = true
-        order[:order_lines].each do |order_line|
-          service = Mirakl::StockCheck.new({sku: order_line[:offer_sku], quantity: order_line[:quantity]})
-          if service.call
-            can_fulfill = service.can_fulfill
-          else
-            raise ServiceError.new(service.errors)
+        if order[:order_state] == "WAITING_ACCEPTANCE"
+          can_fulfill = true
+          order[:order_lines].each do |order_line|
+            service = Mirakl::StockCheck.new({sku: order_line[:offer_sku], quantity: order_line[:quantity]})
+            if service.call
+              can_fulfill = service.can_fulfill
+            else
+              raise ServiceError.new(service.errors)
+            end
+            break unless can_fulfill
           end
-          break unless can_fulfill
+          accept_or_reject_order(order, can_fulfill, store)
+        elsif order[:order_state] == "SHIPPING" # do elsif just to be safe not making double order
+          order_service = Mirakl::BuildOrder.new({mirakl_order_id: order[:order_id], store: store})
+          unless order_service.call
+            raise ServiceError.new(["Error processing order: #{order[:order_id]}", order_service.errors])
+          end
         end
-        accept_or_reject_order(order, can_fulfill, store)
       end
     end
 
     def accept_or_reject_order(order, can_fulfill, store)
       request = SpreeMirakl::Api.new(store).accept_order(order[:order_id], accept_or_reject_order_json(order, can_fulfill))
 
-      unless request.success?
+      if request.success?
+        order_service = Mirakl::BuildOrder.new({mirakl_order_id: order[:order_id], store: store})
+        unless order_service.call
+          raise ServiceError.new(["Error processing order: #{order[:order_id]}", order_service.errors])
+        end
+      else
         raise ServiceError.new(["Issue Processing #{order[:order_id]} can fulfill but request issue"])
       end
     end
