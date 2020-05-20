@@ -47,8 +47,8 @@ module ActiveMerchant #:nodoc:
                             'currency_iso_code': transaction.order.currency
                           }
         end
-
         request = SpreeMirakl::Api.new(transaction.mirakl_store).refund(return_json)
+
         # We have to do it this way because if it is a success parsed response will have refunds
         # if it fails we get message
         if request.success?

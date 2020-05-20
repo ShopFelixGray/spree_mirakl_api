@@ -28,13 +28,24 @@ Each Mirakl Store Requires a user to be assigned to it. All orders from that sto
 
   If your server was running, restart it so that it can find the assets properly.
 
+5. Setup up Mirakl Payment Method
+ 
+  The gem uses a payment method that must be called Mirakl to process payments. After installing the gem please make a payment method of type Mirakl called Mirakl
+
+## TODOs
+ 
+  Shipping Mapper
+  Currently cause we assume shipping is free refunds dont give shipping back
+  We also need to update the return reasons UI to make it more spree like
+  adjustment calculator
+
 ## Setup Cron Jobs
 
 To pull in the orders a cron job is required. There is 3 different services that should be run separately of each other.
 
 1. Mirakl::OrderProcessing.new(stores: Spree::MiraklStore.active)
 
-  This service gets all orders waiting acceptance and checks if they can be fully accepted. If one line item cant be meet the whole order is rejected. An example worker for this would be
+  This service gets all orders waiting acceptance and checks if they can be fully accepted. If one line item cant be meet the whole order is rejected. It also takes any orders ready to be shipped and builds the order in the spree store. An example worker for this would be
 
   ```def perform
     service = Mirakl::OrderProcessing.new(stores: Spree::MiraklStore.active)
@@ -47,20 +58,7 @@ To pull in the orders a cron job is required. There is 3 different services that
 
   Service.errors will return an array of errors and call will return false if there is any errors
 
-2. Mirakl::GetShippingOrders.new({stores: Spree::MiraklStore.active})
-
-  This service takes all orders that are ready to be shipped and pulls them into spree. An example worker for this would be 
-
-  ```def perform
-    service = Mirakl::GetShippingOrders.new({stores: Spree::MiraklStore.active})
-    unless service.call
-      logger.debug service.errors
-      Rollbar.error(Exception.new(service.errors.to_s))
-    end
-  end
-  ```
-
-3. Mirakl::UpdateInventory.new({store: store})
+2. Mirakl::UpdateInventory.new({store: store})
 
   This service syncs a single stores inventory. It takes a single store because it is reused on index. It will use the spree call total_on_hand for a given sku to update Mirakls offerings. An example for a worker would be
 
