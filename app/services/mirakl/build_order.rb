@@ -15,7 +15,9 @@ module Mirakl
         # If order already exist we dont want to remake it. We may want to alert admin some how with an email
         unless Spree::MiraklTransaction.find_by(mirakl_order_id: @mirakl_order_id).present?
           order_data = get_order(@mirakl_order_id, @store)
-          build_order_for_user(order_data, @store)
+          if order_data[:order_state] == "SHIPPING"
+            build_order_for_user(order_data, @store)
+          end
         end
       rescue ServiceError => error
         add_to_errors(error.messages)
@@ -34,31 +36,29 @@ module Mirakl
     end
 
     def build_order_for_user(order_data, store)
-      if order_data[:order_state] == "SHIPPING"
-        begin
-          ActiveRecord::Base.transaction do
-            new_order = Spree::Order.create!
-            new_order.associate_user!(store.user)
-            new_order.channel = 'mirakl'
-            new_order = add_line_items(new_order, order_data[:order_lines])
-            new_order.billing_address = build_address(order_data[:customer][:billing_address], new_order.user)
-            new_order.ship_address = build_address(order_data[:customer][:shipping_address], new_order.user)
-            
+      begin
+        ActiveRecord::Base.transaction do
+          new_order = Spree::Order.create!
+          new_order.associate_user!(store.user)
+          new_order.channel = 'mirakl'
+          new_order = add_line_items(new_order, order_data[:order_lines])
+          new_order.billing_address = build_address(order_data[:customer][:billing_address], new_order.user)
+          new_order.ship_address = build_address(order_data[:customer][:shipping_address], new_order.user)
+          
 
-            while order_next(new_order)
-              if new_order.state == "payment"
-                create_payment(new_order, new_order.total, order_data[:order_id], store)
-              end
-            end
-
-            @order = new_order
-            unless new_order.complete?
-              raise Exception.new("Could not complete order: #{new_order.errors.full_messages.try(:first)}")
+          while order_next(new_order)
+            if new_order.state == "payment"
+              create_payment(new_order, new_order.total, order_data[:order_id], store)
             end
           end
-        rescue Exception => e
-          raise ServiceError.new(["Could not complete order: #{e.message}"])
+
+          @order = new_order
+          unless new_order.complete?
+            raise Exception.new("Could not complete order: #{new_order.errors.full_messages.try(:first)}")
+          end
         end
+      rescue Exception => e
+        raise ServiceError.new(["Could not complete order: #{e.message}"])
       end
     end
 
