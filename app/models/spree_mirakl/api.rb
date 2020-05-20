@@ -38,8 +38,8 @@ class SpreeMirakl::Api
     @response = SpreeMirakl::Request.new(@store).put("/api/orders/refund?shop_id=#{@store.shop_id}", ({ 'refunds': return_json }).to_json)
   end
 
-  def cancel(return_json)
-    @response = SpreeMirakl::Request.new(@store).put("/api/orders/cancel?shop_id=#{@store.shop_id}", ({ 'cancelations': return_json }).to_json)
+  def cancel(mirakl_order_number)
+    @response = SpreeMirakl::Request.new(@store).put("/api/orders/#{mirakl_order_number}/cancel?shop_id=#{@store.shop_id}", '')
   end
 
   def offers

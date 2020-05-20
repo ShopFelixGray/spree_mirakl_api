@@ -30,7 +30,7 @@ module SpreeMirakl
 
       # Check if we are using spree address book
       if `gem list`.include? 'spree_address_book'
-        @address_data.merge({ user: @user, default: false})
+        @address_data = @address_data.merge({ user: @user, default: false})
       end
 
       @address = Spree::Address.create!(@address_data)
@@ -38,11 +38,11 @@ module SpreeMirakl
     end
 
     def get_country_for(country_iso)
-      Spree::Country.find_by(iso: country_iso)
+      Spree::Country.find_by(iso: country_iso) || Spree::Country.find_by(iso3: country_iso)
     end
 
     def get_state_for(state_abbr, country)
-      Spree::State.find_by(abbr: state_abbr, country: country) ||  Spree::State.find_by(name: state_name, country: country)
+      Spree::State.find_by(abbr: state_abbr, country: country) ||  Spree::State.find_by(name: state_abbr, country: country)
     end
 
     def convert_first_name(name)
