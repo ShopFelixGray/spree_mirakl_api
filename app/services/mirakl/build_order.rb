@@ -34,29 +34,31 @@ module Mirakl
     end
 
     def build_order_for_user(order_data, store)
-      begin
-        ActiveRecord::Base.transaction do
-          new_order = Spree::Order.create!
-          new_order.associate_user!(store.user)
-          new_order.channel = 'mirakl'
-          new_order = add_line_items(new_order, order_data[:order_lines])
-          new_order.billing_address = build_address(order_data[:customer][:billing_address], new_order.user)
-          new_order.ship_address = build_address(order_data[:customer][:shipping_address], new_order.user)
-          
+      if order_data[:order_state] == "SHIPPING"
+        begin
+          ActiveRecord::Base.transaction do
+            new_order = Spree::Order.create!
+            new_order.associate_user!(store.user)
+            new_order.channel = 'mirakl'
+            new_order = add_line_items(new_order, order_data[:order_lines])
+            new_order.billing_address = build_address(order_data[:customer][:billing_address], new_order.user)
+            new_order.ship_address = build_address(order_data[:customer][:shipping_address], new_order.user)
+            
 
-          while order_next(new_order)
-            if new_order.state == "payment"
-              create_payment(new_order, new_order.total, order_data[:order_id], store)
+            while order_next(new_order)
+              if new_order.state == "payment"
+                create_payment(new_order, new_order.total, order_data[:order_id], store)
+              end
+            end
+
+            @order = new_order
+            unless new_order.complete?
+              raise Exception.new("Could not complete order: #{new_order.errors.full_messages.try(:first)}")
             end
           end
-
-          @order = new_order
-          unless new_order.complete?
-            raise Exception.new("Could not complete order: #{new_order.errors.full_messages.try(:first)}")
-          end
+        rescue Exception => e
+          raise ServiceError.new(["Could not complete order: #{e.message}"])
         end
-      rescue Exception => e
-        raise ServiceError.new(["Could not complete order: #{e.message}"])
       end
     end
 
