@@ -34,8 +34,9 @@ module ActiveMerchant #:nodoc:
         transaction = Spree::MiraklTransaction.find_by(mirakl_order_id: mirakl_source)
         return ActiveMerchant::Billing::Response.new(false, "Reimburstment Required", {}, {}) unless refund.reimbursement.present? || transaction.present?
         refund.reimbursement.customer_return.return_items.each do |return_item|
-          line_item_quantity = return_item.inventory_unit.line_item.quantity
-          mirakl_order_line = return_item.inventory_unit.line_item.mirakl_order_line
+          line_item_quantity = return_item.inventory_unit.line_item.mirakl_order_lines.count
+          mirakl_order_line = return_item.inventory_unit.mirakl_order_line
+
           # Look to refactor refund reasons code
           return_json << {  'amount': return_item.total, 
                             'order_line_id': mirakl_order_line.mirakl_order_line_id, 

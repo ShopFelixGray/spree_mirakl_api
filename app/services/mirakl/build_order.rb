@@ -46,15 +46,23 @@ module Mirakl
           new_order.billing_address = build_address(order_data[:customer][:billing_address], new_order.user)
           new_order.ship_address = build_address(order_data[:customer][:shipping_address], new_order.user)
           
-
           while order_next(new_order)
             if new_order.state == "payment"
               create_payment(new_order, new_order.total, order_data[:order_id], store)
             end
           end
-
+                     
           @order = new_order
-          unless new_order.complete?
+          if new_order.complete?
+            new_order.reload.line_items.each do |line_item|
+              # In the case where each unit gets its own line item in mirakl we do index but in the case where it matches spree
+              # and there will only be 1 line item for a qty of 3 we just use first cause there will only ever be one
+              mirakl_order_lines = Spree::MiraklOrderLine.where(line_item_id: line_item.id)
+              line_item.inventory_units.each_with_index do |unit, index|
+                Spree::MiraklOrderLineInventoryUnit.create!(inventory_unit: unit, mirakl_order_line: (mirakl_order_lines[index] || mirakl_order_lines.first))
+              end
+            end
+          else
             raise Exception.new("Could not complete order: #{new_order.errors.full_messages.try(:first)}")
           end
         end

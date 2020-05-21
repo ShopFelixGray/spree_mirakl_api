@@ -3,4 +3,5 @@ class Spree::MiraklOrderLine < ActiveRecord::Base
   belongs_to :line_item
 
   has_many :mirakl_order_line_taxes
+  has_many :mirakl_order_line_inventory_units
 end
