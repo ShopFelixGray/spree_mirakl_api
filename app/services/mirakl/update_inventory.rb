@@ -67,7 +67,7 @@ module Mirakl
               "available_started": offer_data[:available_started],
               "description": offer_data[:description],
               "internal_description": offer_data[:internal_description],
-              "price": 95.00,
+              "price": offer_data[:price],
               "product_id": offer_data[:product_id],
               "product_id_type": offer_data[:product_id_type],
               "product_tax_code": offer_data[:product_tax_code],

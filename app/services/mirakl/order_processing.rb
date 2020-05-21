@@ -39,12 +39,7 @@ module Mirakl
         if order[:order_state] == "WAITING_ACCEPTANCE"
           can_fulfill = true
           order[:order_lines].each do |order_line|
-            service = Mirakl::StockCheck.new({sku: order_line[:offer_sku], quantity: order_line[:quantity]})
-            if service.call
-              can_fulfill = service.can_fulfill
-            else
-              raise ServiceError.new(service.errors)
-            end
+            can_fulfill = check_stock(sku: order_line[:offer_sku], quantity: order_line[:quantity])
             break unless can_fulfill
           end
           accept_or_reject_order(order, can_fulfill, store)
@@ -77,6 +72,17 @@ module Mirakl
         order_data << { 'accepted': can_fulfill, 'id': order_line[:order_line_id] }
       end
       order_data
+    end
+
+
+    def check_stock(sku, quantity)
+      variant = Spree::Variant.find_by(sku: sku)
+
+      if variant.present?
+        return (quantity <= variant.quantity_check)
+      else
+        return false
+      end
     end
 
   end
