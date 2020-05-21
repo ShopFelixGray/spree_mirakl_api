@@ -124,10 +124,10 @@ module Mirakl
               to_return(status: 200, body: ({ "orders": [{ "order_state": "WAITING_ACCEPTANCE", "order_lines": [{ "offer_sku": product.sku, "quantity": 1 }]}] }).to_json, headers: {})
           end
 
-          it 'loops through once' do
-            expect_any_instance_of(Mirakl::StockCheck).to receive(:call).once
-            service.call
-          end
+          #it 'loops through once' do
+          #  expect_any_instance_of(Mirakl::StockCheck).to receive(:call).once
+          #  service.call
+          #end
         end
       end
     end
