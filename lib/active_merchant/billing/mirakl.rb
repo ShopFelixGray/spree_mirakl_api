@@ -47,8 +47,19 @@ module ActiveMerchant #:nodoc:
           inventory_unit_sku = return_item.inventory_unit.variant.sku
           order_line_data = nil
           order_data[:order_lines].each do |order_line|
+            # See if the sku for the order line matches the return item
             if order_line[:offer_sku] == inventory_unit_sku
-              if (order_line[:refunds].length + (refunds_processed[order_line[:order_line_id]] || 0)) < line_item_quantity
+              # If it does then we check if this line item already has returns on it
+              # Because we do returns by unit the refunds array should repersent inventory unit
+              # Because we maybe returning multiple units on the same line item we want to make sure we keep an accruate account
+              # as we go through the loop. That is where refunds_processed[order_line[:order_line_id] is used.
+              # If the order is 12 different order_lines with the same skus each one would be incremented to 1 
+              # and the order_line[:quantity] would be 1. So after one time through  order_line[:quantity] is 1 and refunds_processed[order_line[:order_line_id]] would equal 1
+              # so it wouldnt set order_line_data. It would move to the next order_line to see if we can place the refund there
+              # If the order has 1 order line with quantity 3 say 1 of a certain sku is already refunded
+              # order_line[:refunds].length would equal 1 and then after the first time through refunds_processed[order_line[:order_line_id]] would be 1
+              # when the thrid item comes through it should still enter the loop as it be 1 + 1 < 3
+              if (order_line[:refunds].length + (refunds_processed[order_line[:order_line_id]] || 0)) < order_line[:quantity]
                 order_line_data = order_line
                 refunds_processed[order_line[:order_line_id]] = (refunds_processed[order_line[:order_line_id]] || 0) + 1
                 break
