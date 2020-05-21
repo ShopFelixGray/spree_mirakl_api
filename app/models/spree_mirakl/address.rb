@@ -19,13 +19,13 @@ module SpreeMirakl
         address2: @data[:street_2],
         city: @data[:city],
         zipcode: @data[:zip_code],
-        firstname: convert_first_name(@data[:firstname]) || 'Mirakl',
-        lastname: convert_last_name(@data[:lastname]) || 'User',
+        firstname: (@data[:firstname] || 'Mirakl'),
+        lastname: (@data[:lastname] || 'User'),
         state_name: state.name,
         state: state,
         company: @data[:company],
         country: country,
-        phone: convert_phone(@data[:phone_secondary]) || '0000000000'
+        phone: convert_phone(@data[:phone] || @data[:phone_secondary]) || '0000000000'
       }
 
       # Check if we are using spree address book
@@ -43,19 +43,6 @@ module SpreeMirakl
 
     def get_state_for(state_abbr, country)
       Spree::State.find_by(abbr: state_abbr, country: country) ||  Spree::State.find_by(name: state_abbr, country: country)
-    end
-
-    def convert_first_name(name)
-      return nil if name.blank?
-      name.split(' ').first
-    end
-
-    def convert_last_name(name)
-      return nil if name.blank?
-      names = name.split(' ')
-      names.shift
-      names = names.join(' ')
-      names.blank? ? nil : names
     end
 
     def convert_phone(phone_number)
