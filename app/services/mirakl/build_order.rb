@@ -67,26 +67,12 @@ module Mirakl
       order_lines.each do |order_line|
         variant = Spree::Variant.includes(:stock_items).find_by(sku: order_line[:offer_sku])
         line_item_added = order.contents.add(variant, order_line[:quantity])
-        mirakl_order_line = Spree::MiraklOrderLine.create!(line_item: line_item_added, mirakl_order_line_id: order_line[:order_line_id])
-        build_taxes(order_line[:taxes], mirakl_order_line, 'tax')
-        build_taxes(order_line[:shipping_taxes], mirakl_order_line, 'shipping_tax')
       end
       return order
     end
 
     def build_address(address, user)
       SpreeMirakl::Address.new(address, user).build_address
-    end
-
-    def build_taxes(order_line_taxes, mirakl_order_line, tax_type)
-      order_line_taxes.each do |tax|
-        Spree::MiraklOrderLineTax.create!(
-          tax_type: tax_type,
-          amount: tax[:amount],
-          code: tax[:code],
-          mirakl_order_line: mirakl_order_line
-        )
-      end
     end
 
     def create_payment(order, amount, mirakl_order_number, store)
