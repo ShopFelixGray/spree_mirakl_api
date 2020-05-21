@@ -39,7 +39,7 @@ module Mirakl
         if order[:order_state] == "WAITING_ACCEPTANCE"
           can_fulfill = true
           order[:order_lines].each do |order_line|
-            can_fulfill = check_stock(sku: order_line[:offer_sku], quantity: order_line[:quantity])
+            can_fulfill = check_stock(order_line[:offer_sku], order_line[:quantity])
             break unless can_fulfill
           end
           accept_or_reject_order(order, can_fulfill, store)
