@@ -33,7 +33,6 @@ module ActiveMerchant #:nodoc:
         return_json = []
         transaction = Spree::MiraklTransaction.find_by(mirakl_order_id: mirakl_source)
         
-        
         request = SpreeMirakl::Api.new(transaction.mirakl_store).get_order(transaction.mirakl_order_id)
         order_data = nil
         if request.success?
@@ -76,7 +75,6 @@ module ActiveMerchant #:nodoc:
         request = SpreeMirakl::Api.new(transaction.mirakl_store).refund(return_json)
         # We have to do it this way because if it is a success parsed response will have refunds
         # if it fails we get message
-        binding.pry
         if request.success?
           ActiveMerchant::Billing::Response.new(true, "", request.parsed_response, authorization: request.parsed_response["refunds"].map{ |refund| refund["refund_id"] }.join('-'))
         else 
