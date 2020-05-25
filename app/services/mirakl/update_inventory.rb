@@ -1,11 +1,12 @@
 module Mirakl
   class UpdateInventory < ApplicationService
 
-    attr_reader :order
+    attr_reader :update_json, :store
 
     def initialize(args = {})
       super
       @store = args[:store]
+      @update_json = []
     end
 
     def call
@@ -33,7 +34,6 @@ module Mirakl
     end
 
     def update_inventory(offers_data)
-      update_json = []
       variants_not_found = []
       offers_data.each do |offer|
         # We need to request offer_data cause the index wont include product_tax_code
@@ -42,7 +42,7 @@ module Mirakl
           offer_data = JSON.parse(response.body, {symbolize_names: true})
           variant = Spree::Variant.find_by(sku: offer_data[:shop_sku])
           if variant.present?
-            update_json << {
+            @update_json << {
               "all_prices": offer_data[:all_prices],
               "allow_quote_requests": offer_data[:allow_quote_requests],
               "available_ended": offer_data[:available_ended],
@@ -60,7 +60,7 @@ module Mirakl
             }
           else
             # Update the item to out of stock because we dont have the SKU and throw an error
-            update_json << {
+            @update_json << {
               "all_prices": offer_data[:all_prices],
               "allow_quote_requests": offer_data[:allow_quote_requests],
               "available_ended": offer_data[:available_ended],
@@ -83,8 +83,7 @@ module Mirakl
         end
       end
 
-      response = SpreeMirakl::Api.new(@store).update_offers(update_json)
-
+      response = SpreeMirakl::Api.new(@store).update_offers(@update_json)
       unless response.success?
         raise ServiceError.new(["Issue updating inventory: #{response}"])
       end
