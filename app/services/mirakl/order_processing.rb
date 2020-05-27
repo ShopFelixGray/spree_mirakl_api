@@ -55,12 +55,12 @@ module Mirakl
     def accept_or_reject_order(order, can_fulfill, store)
       request = SpreeMirakl::Api.new(store).accept_order(order[:order_id], accept_or_reject_order_json(order, can_fulfill))
 
-      if request.success?
+      if request.success? && can_fulfill
         order_service = Mirakl::BuildOrder.new({mirakl_order_id: order[:order_id], store: store})
         unless order_service.call
           raise ServiceError.new(["Error processing order: #{order[:order_id]}", order_service.errors])
         end
-      else
+      elsif !request.success?
         raise ServiceError.new(["Issue Processing #{order[:order_id]} can fulfill but request issue"])
       end
     end
