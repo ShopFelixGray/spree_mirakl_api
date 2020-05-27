@@ -13,5 +13,4 @@ class Spree::MiraklTransaction < ActiveRecord::Base
   def name
     'Mirakl'
   end
-
 end

@@ -25,21 +25,19 @@ module ActiveMerchant #:nodoc:
       end
 
       def refund(money, mirakl_source, options = {})
-        credit(money, mirakl_source, options = {})
+        credit(money, mirakl_source, options)
       end
 
       def credit(money, mirakl_source, options = {})
         refund = options[:originator]
         return_json = []
         transaction = Spree::MiraklTransaction.find_by(mirakl_order_id: mirakl_source)
-        
+
         request = SpreeMirakl::Api.new(transaction.mirakl_store).get_order(transaction.mirakl_order_id)
-        order_data = nil
-        if request.success?
-          order_data = JSON.parse(request.body, {symbolize_names: true})[:orders][0]
-        else
-          return ActiveMerchant::Billing::Response.new(false, "Could not get data from Mirakl for order: #{transaction.mirakl_order_id}", {}, {})
-        end
+
+        return ActiveMerchant::Billing::Response.new(false, "Could not get data from Mirakl for order: #{transaction.mirakl_order_id}", {}, {}) unless request.success?
+
+        order_data = JSON.parse(request.body, {symbolize_names: true})[:orders][0]
 
         refunds_processed =  {}
         refund.reimbursement.customer_return.return_items.each do |return_item|
@@ -53,7 +51,7 @@ module ActiveMerchant #:nodoc:
               # Because we do returns by unit the refunds array should repersent inventory unit
               # Because we maybe returning multiple units on the same line item we want to make sure we keep an accruate account
               # as we go through the loop. That is where refunds_processed[order_line[:order_line_id] is used.
-              # If the order is 12 different order_lines with the same skus each one would be incremented to 1 
+              # If the order is 12 different order_lines with the same skus each one would be incremented to 1
               # and the order_line[:quantity] would be 1. So after one time through  order_line[:quantity] is 1 and refunds_processed[order_line[:order_line_id]] would equal 1
               # so it wouldnt set order_line_data. It would move to the next order_line to see if we can place the refund there
               # If the order has 1 order line with quantity 3 say 1 of a certain sku is already refunded
@@ -72,8 +70,8 @@ module ActiveMerchant #:nodoc:
           end
           # mirakl_order_line = return_item.inventory_unit.line_item.mirakl_order_line
           # Look to refactor refund reasons code
-          return_json << {  'amount': return_item.total, 
-                            'order_line_id': order_line_data[:order_line_id], 
+          return_json << {  'amount': return_item.total,
+                            'order_line_id': order_line_data[:order_line_id],
                             'shipping_amount': order_line_data[:shipping_price]/return_item.inventory_unit.line_item.order.item_count,
                             'reason_code': transaction.mirakl_store.mirakl_refund_reasons.joins(:refund_reasons).where(spree_refund_reasons: { id: refund.refund_reason_id }).first.try(:code) || transaction.mirakl_store.mirakl_refund_reasons.first.code,
                             'taxes': taxes_json(order_line_data[:taxes], line_item_quantity),
@@ -82,13 +80,12 @@ module ActiveMerchant #:nodoc:
                             'currency_iso_code': transaction.order.currency
                           }
         end
-
         request = SpreeMirakl::Api.new(transaction.mirakl_store).refund(return_json)
         # We have to do it this way because if it is a success parsed response will have refunds
         # if it fails we get message
         if request.success?
           ActiveMerchant::Billing::Response.new(true, "", request.parsed_response, authorization: request.parsed_response["refunds"].map{ |refund| refund["refund_id"] }.join('-'))
-        else 
+        else
           ActiveMerchant::Billing::Response.new(false, request.parsed_response['message'][0...255], {}, {})
         end
       end
@@ -107,7 +104,7 @@ module ActiveMerchant #:nodoc:
             'code': tax[:code]
           }
         end
-        return json_data
+        json_data
       end
     end
   end

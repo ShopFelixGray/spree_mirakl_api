@@ -1,5 +1,4 @@
 class Spree::Admin::MiraklStoresController < Spree::Admin::ResourceController
-
   def index
     @mirakl_stores = Spree::MiraklStore.all
   end
@@ -59,7 +58,7 @@ class Spree::Admin::MiraklStoresController < Spree::Admin::ResourceController
           @mirakl_refund_reason.update(refund_reason_ids: params[:refund_reason].select{|key, hash|  hash == @mirakl_refund_reason.id.to_s }.keys)
         end
       end
-      flash[:notice] = "Updated"
+      flash[:notice] = 'Updated'
       redirect_to admin_mirakl_store_reason_mapper_path(@mirakl_refund_reason.mirakl_store)
     rescue => exception
       flash[:error] = exception.message
@@ -69,7 +68,7 @@ class Spree::Admin::MiraklStoresController < Spree::Admin::ResourceController
 
   def refresh_inventory
     MiraklInventoryUpdateJob.perform_later(params[:mirakl_store_id])
-    flash[:notice] = "Refresh Queued"
+    flash[:notice] = 'Refresh Queued'
     redirect_to admin_mirakl_stores_path
   end
 
@@ -82,4 +81,4 @@ class Spree::Admin::MiraklStoresController < Spree::Admin::ResourceController
   def mirakl_store_params
     params.require(:mirakl_store).permit(:name, :api_key, :url, :active, :user_id)
   end
-end 
+end

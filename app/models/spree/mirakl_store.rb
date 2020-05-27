@@ -13,14 +13,15 @@ class Spree::MiraklStore < ActiveRecord::Base
   before_destroy :check_for_orders, prepend: true
 
   def check_for_orders
-    if self.mirakl_transactions.present?
-      errors[:base] << Spree.t(:mirakl_store_cant_be_destroyed)
-      return false
-    end
+    return unless mirakl_transactions.present?
+
+    errors[:base] << Spree.t(:mirakl_store_cant_be_destroyed)
+    false
   end
 
   def pull_in_shop_info
     # TODO: Look to refactor if possible
+    # TODO: THIS NEEDS TO BE IN A CONTROLLER - HF
     if self.shop_id.nil?
       mirakl_request = SpreeMirakl::Api.new(self)
       request = mirakl_request.account()

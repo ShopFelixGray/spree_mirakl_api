@@ -1,6 +1,5 @@
 module Mirakl
   class BuildOrder < ApplicationService
-
     attr_reader :order
 
     def initialize(args = {})
@@ -16,7 +15,7 @@ module Mirakl
         # If order already exist we dont want to remake it. We may want to alert admin some how with an email
         unless Spree::MiraklTransaction.find_by(mirakl_order_id: @mirakl_order_id).present?
           order_data = get_order(@mirakl_order_id, @store)
-          if order_data[:order_state] == "SHIPPING" || @force_sync
+          if order_data[:order_state] == 'SHIPPING' || @force_sync
             build_order_for_user(order_data, @store)
           end
         end
@@ -24,13 +23,13 @@ module Mirakl
         add_to_errors(error.messages)
       end
 
-      return completed_without_errors?
+      completed_without_errors?
     end
 
     def get_order(mirakl_order_id, store)
       request = SpreeMirakl::Api.new(store).get_order(mirakl_order_id)
       if request.success?
-        return JSON.parse(request.body, {symbolize_names: true})[:orders][0]
+        return JSON.parse(request.body, symbolize_names: true)[:orders][0]
       else
         raise ServiceError.new(["Issue processing #{mirakl_order_id}"])
       end
@@ -45,10 +44,10 @@ module Mirakl
           new_order = add_line_items(new_order, order_data[:order_lines])
           new_order.billing_address = build_address(order_data[:customer][:billing_address], new_order.user)
           new_order.ship_address = build_address(order_data[:customer][:shipping_address], new_order.user)
-          
+
 
           while order_next(new_order)
-            if new_order.state == "payment"
+            if new_order.state == 'payment'
               create_payment(new_order, new_order.total, order_data[:order_id], store)
             end
           end
@@ -95,6 +94,5 @@ module Mirakl
       order.temporary_address = true
       order.next
     end
-
   end
 end
