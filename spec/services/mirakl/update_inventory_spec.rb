@@ -12,52 +12,52 @@ module Mirakl
     let!(:product) { create(:product_in_stock) }
 
     let(:offers_data) {{
-      "offers": [
+      offers: [
         {
-          "all_prices": [
+          all_prices: [
             {
-              "channel_code": nil,
-              "discount_end_date": nil,
-              "discount_start_date": nil,
-              "price": 95.00,
-              "unit_discount_price": nil,
-              "unit_origin_price": 95.00,
-              "volume_prices": [
+              channel_code: nil,
+              discount_end_date: nil,
+              discount_start_date: nil,
+              price: 95.00,
+              unit_discount_price: nil,
+              unit_origin_price: 95.00,
+              volume_prices: [
                 {
-                  "price": 95.00,
-                  "quantity_threshold": 1,
-                  "unit_discount_price": nil,
-                  "unit_origin_price": 95.00
+                  price: 95.00,
+                  quantity_threshold: 1,
+                  unit_discount_price: nil,
+                  unit_origin_price: 95.00
                 }
               ]
             }
           ],
-          "allow_quote_requests": false,
-          "description": nil,
-          "discount": nil,
-          "offer_id": "test",
-          "price": product.price,
-          "product_sku": product.sku,
-          "quantity": product.master.quantity_check,
-          "shop_sku": product.sku,
-          "state_code": "11"
+          allow_quote_requests: false,
+          description: nil,
+          discount: nil,
+          offer_id: 'test',
+          price: product.price,
+          product_sku: product.sku,
+          quantity: product.master.quantity_check,
+          shop_sku: product.sku,
+          state_code: '11'
         }
       ]
     }.to_json}
 
     let(:offer_data) {
         {
-          "all_prices": [
+          all_prices: [
           ],
-          "allow_quote_requests": false,
-          "description": nil,
-          "discount": nil,
-          "offer_id": "test",
-          "price": product.price,
-          "product_sku": product.sku,
-          "quantity": product.master.quantity_check,
-          "shop_sku": product.sku,
-          "state_code": "11"
+          allow_quote_requests: false,
+          description: nil,
+          discount: nil,
+          offer_id: 'test',
+          price: product.price,
+          product_sku: product.sku,
+          quantity: product.master.quantity_check,
+          shop_sku: product.sku,
+          state_code: '11'
         }.to_json}
 
     let(:service) { described_class.new(service_arguments) }
@@ -89,12 +89,12 @@ module Mirakl
 
         context 'when a ServiceError is raised' do
           before do
-            allow(service).to receive(:get_offers).and_raise(ServiceError.new(["Something went wrong"]))
+            allow(service).to receive(:get_offers).and_raise(ServiceError.new(['Something went wrong']))
           end
 
           it 'rescues the error and adds to the errors array' do
             service.call
-            expect(service.errors).to eq(["Something went wrong"])
+            expect(service.errors).to eq(['Something went wrong'])
           end
         end
 
@@ -108,7 +108,7 @@ module Mirakl
 
         context 'when errors are present' do
           before do
-            allow(service).to receive(:errors).and_return(["Something went wrong"])
+            allow(service).to receive(:errors).and_return(['Something went wrong'])
           end
 
           it 'returns false' do
@@ -129,13 +129,13 @@ module Mirakl
 
         it 'returns the correct json' do
           json_results = service.send(:get_offers)
-          expect(json_results).to eq(JSON.parse(offers_data, {symbolize_names: true})[:offers])
+          expect(json_results).to eq(JSON.parse(offers_data, symbolize_names: true)[:offers])
         end
 
         describe 'get_offers bad_data' do
           before do
             stub_request(:get, "#{store.url}/api/offers?limit=100&max=100&shop_id=#{store.shop_id}").
-              to_return(status: 200, body: '', headers: {})
+              to_return(status: 500, body: '', headers: {})
           end
 
           it 'errors correctly' do
@@ -153,59 +153,59 @@ module Mirakl
         end
 
         it 'builds the json correctly' do
-          service.send(:update_inventory, JSON.parse(offers_data, {symbolize_names: true})[:offers])
+          service.send(:update_inventory, JSON.parse(offers_data, symbolize_names: true)[:offers])
           expect(service.update_json).to eq([{
-            "all_prices": [
+            all_prices: [
             ],
-            "allow_quote_requests": false,
-            "available_ended": nil,
-            "available_started": nil,
-            "description": nil,
-            "internal_description": nil,
-            "price": product.price,
-            "product_id": nil,
-            "product_id_type": nil,
-            "product_tax_code": nil,
-            "quantity": product.master.quantity_check,
-            "shop_sku": product.sku,
-            "state_code": "11",
-            "update_delete": "update"
+            allow_quote_requests: false,
+            available_ended: nil,
+            available_started: nil,
+            description: nil,
+            internal_description: nil,
+            price: product.price,
+            product_id: nil,
+            product_id_type: nil,
+            product_tax_code: nil,
+            quantity: product.master.quantity_check,
+            shop_sku: product.sku,
+            state_code: '11',
+            update_delete: 'update'
           }])
         end
       end
 
       describe 'when sku doesnt exist' do
         let(:offers_data) {{
-          "offers": [
+          offers: [
             {
-              "all_prices": [
+              all_prices: [
               ],
-              "allow_quote_requests": false,
-              "description": nil,
-              "discount": nil,
-              "offer_id": "test",
-              "price": "95.00",
-              "product_sku": "not_here",
-              "quantity": "50",
-              "shop_sku": "not_here",
-              "state_code": "11"
+              allow_quote_requests: false,
+              description: nil,
+              discount: nil,
+              offer_id: 'test',
+              price: '95.00',
+              product_sku: 'not_here',
+              quantity: '50',
+              shop_sku: 'not_here',
+              state_code: '11'
             }
           ]
         }.to_json}
 
         let(:offer_data) {
           {
-            "all_prices": [
+            all_prices: [
             ],
-            "allow_quote_requests": false,
-            "description": nil,
-            "discount": nil,
-            "offer_id": "test",
-            "price": "95.00",
-            "product_sku": "not_here",
-            "quantity": "50",
-            "shop_sku": "not_here",
-            "state_code": "11"
+            allow_quote_requests: false,
+            description: nil,
+            discount: nil,
+            offer_id: 'test',
+            price: '95.00',
+            product_sku: 'not_here',
+            quantity: '50',
+            shop_sku: 'not_here',
+            state_code: '11'
           }.to_json}
 
         before do
@@ -216,23 +216,23 @@ module Mirakl
         end
 
         it 'returns an out of stock json object' do
-          service.send(:update_inventory, JSON.parse(offers_data, {symbolize_names: true})[:offers])
+          service.send(:update_inventory, JSON.parse(offers_data, symbolize_names: true)[:offers])
           expect(service.update_json).to eq([{
-            "all_prices": [
+            all_prices: [
             ],
-            "allow_quote_requests": false,
-            "available_ended": nil,
-            "available_started": nil,
-            "description": nil,
-            "internal_description": nil,
-            "price": "95.00",
-            "product_id": nil,
-            "product_id_type": nil,
-            "product_tax_code": nil,
-            "quantity": 0,
-            "shop_sku": "not_here",
-            "state_code": "11",
-            "update_delete": "update"
+            allow_quote_requests: false,
+            available_ended: nil,
+            available_started: nil,
+            description: nil,
+            internal_description: nil,
+            price: '95.00',
+            product_id: nil,
+            product_id_type: nil,
+            product_tax_code: nil,
+            quantity: 0,
+            shop_sku: 'not_here',
+            state_code: '11',
+            update_delete: 'update'
           }])
         end
 
@@ -248,7 +248,7 @@ module Mirakl
 
         it 'throws an error correctly' do
           service.call
-          expect(service.errors).to eq(["Issue updating inventory: "])
+          expect(service.errors).to eq(['Issue updating inventory: '])
         end
       end
     end

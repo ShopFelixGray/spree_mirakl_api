@@ -3,9 +3,7 @@ class MiraklInventoryUpdateJob < ActiveJob::Base
 
   def perform(store_id)
     store = Spree::MiraklStore.find(store_id)
-    service = Mirakl::UpdateInventory.new({store: store})
-    unless service.call
-      raise Exception.new("Issue with updating inventory for store: #{store.shop_id}")
-    end
+    service = Mirakl::UpdateInventory.new(store: store)
+    raise Exception.new("Issue with updating inventory for store: #{store.shop_id}") unless service.call
   end
 end

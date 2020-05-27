@@ -28,46 +28,38 @@ module Mirakl
 
     def get_order(mirakl_order_id, store)
       request = SpreeMirakl::Api.new(store).get_order(mirakl_order_id)
-      if request.success?
-        return JSON.parse(request.body, symbolize_names: true)[:orders][0]
-      else
-        raise ServiceError.new(["Issue processing #{mirakl_order_id}"])
-      end
+      raise ServiceError.new(["Issue processing #{mirakl_order_id}"]) unless request.success?
+      JSON.parse(request.body, symbolize_names: true)[:orders][0]
     end
 
     def build_order_for_user(order_data, store)
-      begin
-        ActiveRecord::Base.transaction do
-          new_order = Spree::Order.create!
-          new_order.associate_user!(store.user)
-          new_order.channel = 'mirakl'
-          new_order = add_line_items(new_order, order_data[:order_lines])
-          new_order.billing_address = build_address(order_data[:customer][:billing_address], new_order.user)
-          new_order.ship_address = build_address(order_data[:customer][:shipping_address], new_order.user)
+      ActiveRecord::Base.transaction do
+        new_order = Spree::Order.create!
+        new_order.associate_user!(store.user)
+        new_order.channel = 'mirakl'
+        new_order = add_line_items(new_order, order_data[:order_lines])
+        new_order.billing_address = build_address(order_data[:customer][:billing_address], new_order.user)
+        new_order.ship_address = build_address(order_data[:customer][:shipping_address], new_order.user)
 
-
-          while order_next(new_order)
-            if new_order.state == 'payment'
-              create_payment(new_order, new_order.total, order_data[:order_id], store)
-            end
-          end
-
-          @order = new_order
-          unless new_order.complete?
-            raise Exception.new("Could not complete order: #{new_order.errors.full_messages.try(:first)}")
+        while order_next(new_order)
+          if new_order.state == 'payment'
+            create_payment(new_order, new_order.total, order_data[:order_id], store)
           end
         end
-      rescue Exception => e
-        raise ServiceError.new(["Could not complete order: #{e.message}"])
+
+        @order = new_order
+        unless new_order.complete?
+          raise ServiceError.new(["Could not complete order: #{e.message}"])
+        end
       end
     end
 
     def add_line_items(order, order_lines)
       order_lines.each do |order_line|
         variant = Spree::Variant.includes(:stock_items).find_by(sku: order_line[:offer_sku])
-        line_item_added = order.contents.add(variant, order_line[:quantity])
+        order.contents.add(variant, order_line[:quantity])
       end
-      return order
+      order
     end
 
     def build_address(address, user)
@@ -75,19 +67,17 @@ module Mirakl
     end
 
     def create_payment(order, amount, mirakl_order_number, store)
-      begin
-        payment = order.payments.build order: order
-        payment.amount = amount
-        payment.state =  'completed'
-        payment.created_at = Time.current()
-        payment.payment_method = Spree::PaymentMethod.find_by_name!("Mirakl")
-        payment.response_code = mirakl_order_number
-        payment.source = Spree::MiraklTransaction.create!(order: order, mirakl_order_id: mirakl_order_number, mirakl_store: store)
-        payment.save!
-        payment
-      rescue Exception => e
-        raise ServiceError.new([e.message])
-      end
+      payment = order.payments.build order: order
+      payment.amount = amount
+      payment.state =  'completed'
+      payment.created_at = Time.current()
+      payment.payment_method = Spree::PaymentMethod.find_by_name!('Mirakl')
+      payment.response_code = mirakl_order_number
+      payment.source = Spree::MiraklTransaction.create!(order: order,
+                                                        mirakl_order_id: mirakl_order_number,
+                                                        mirakl_store: store
+                                                       )
+      raise ServiceError.new([e.message]) unless payment.save
     end
 
     def order_next(order)
