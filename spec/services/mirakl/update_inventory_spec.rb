@@ -140,7 +140,7 @@ module Mirakl
 
           it 'errors correctly' do
             service.call
-            expect(service.errors).to eq(["Error in getting Mirakl Orders for shop id: #{store.shop_id}"])
+            expect(service.errors).to eq(["Error in getting Mirakl Offers for shop id: #{store.shop_id}"])
           end
         end
 

@@ -26,6 +26,6 @@ en:
     error_requesting_waiting_and_shipping: Error in getting Waiting Acceptance and Shipping
     order_process_error: "Error processing order: %{order_id}"
     issue_acceptance: "Issue Processing %{order_id} can fulfill but request issue"
-    issue_requesting_offers: "Error in getting Mirakl Offers for shop id: {%shop_id}"
+    issue_requesting_offers: "Error in getting Mirakl Offers for shop id: %{shop_id}"
     sku_missing: "Couldn't find variant sku: %{sku}"
     inventory_update_issue: "Issue updating inventory: %{response}"
