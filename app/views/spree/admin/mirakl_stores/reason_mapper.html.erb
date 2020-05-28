@@ -6,10 +6,10 @@
       <th>Mirakl Reason</th>
     </tr>
     <%= fields_for :refund_reason do |form| %>
-      <% Spree::RefundReason.all.each do |refund_reason| %>
+      <% Spree::ReturnAuthorizationReason.all.each do |refund_reason| %>
         <tr>
           <td><%= label_tag "#{refund_reason.name}:" %></td>
-          <td><%= form.select refund_reason.id, options_for_select(@mirakl_store.mirakl_refund_reasons.all.collect{ |u| [u.label, u.id] }, @mirakl_store.mirakl_refund_reasons.joins(:refund_reasons).where(spree_refund_reasons: { id: refund_reason.id }).first.try(:id) ) %></td>
+          <td><%= form.select refund_reason.id, options_for_select(@mirakl_store.mirakl_refund_reasons.all.collect{ |u| [u.label, u.id] }, @mirakl_store.mirakl_refund_reasons.joins(:return_authorization_reasons).where(spree_return_authorization_reasons: { id: refund_reason.id }).first.try(:id) ) %></td>
         </tr>
       <% end %>
     <% end %>
