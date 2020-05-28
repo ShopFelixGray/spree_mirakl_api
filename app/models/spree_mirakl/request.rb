@@ -9,21 +9,20 @@ class SpreeMirakl::Request
   end
 
   def get(path)
-    headers = { 'Authorization': @store.api_key, 'Accept': 'application/json' }
-    @request = HTTParty.get("#{@store.url}#{path}", headers: headers)
-    @request
+    header = { 'Authorization': @store.api_key, 'Accept': 'application/json' }
+    @request = HTTParty.get("#{@store.url}#{path}", headers: header)
   end
 
   def put(path, data)
-    headers = { 'Authorization': @store.api_key, 'Accept': 'application/json', 'Content-Type': 'application/json' }
     @request = HTTParty.put("#{@store.url}#{path}", body: data, headers: headers)
-    @request
   end
 
   def post(path, data)
-    headers = { 'Authorization': @store.api_key, 'Accept': 'application/json', 'Content-Type': 'application/json' }
     @request = HTTParty.post("#{@store.url}#{path}", body: data, headers: headers)
-    @request
+  end
+
+  def headers
+    { 'Authorization': @store.api_key, 'Accept': 'application/json', 'Content-Type': 'application/json' }
   end
 
   def body
@@ -37,5 +36,4 @@ class SpreeMirakl::Request
   def response_code
     @request.code
   end
-
 end
