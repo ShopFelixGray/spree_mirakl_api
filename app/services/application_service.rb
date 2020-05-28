@@ -1,5 +1,4 @@
 class ApplicationService
-
   attr_accessor :errors
 
   def initialize(args = {})
@@ -7,7 +6,7 @@ class ApplicationService
   end
 
   def call
-    return completed_without_errors?
+    completed_without_errors?
   end
 
   private
@@ -17,7 +16,6 @@ class ApplicationService
   end
 
   def completed_without_errors?
-    return errors.none?
+    errors.none?
   end
-
-end 
+end

@@ -1,6 +1,5 @@
 module Spree
   class Gateway::Mirakl < Gateway
-
     def provider_class
       ActiveMerchant::Billing::Mirakl
     end
@@ -18,37 +17,21 @@ module Spree
     end
 
     def self.version
-      "1.0"
+      '1.0'
     end
-    
-    def cancel(mirakl_source, options={})
+
+    def cancel(mirakl_source, _options = {})
       transaction = Spree::MiraklTransaction.find_by(mirakl_order_id: mirakl_source)
 
-      if transaction.present?
-        request = SpreeMirakl::Api.new(transaction.mirakl_store).cancel(transaction.mirakl_order_id)
-        # We have to do it this way because if it is a success parsed response will have refunds
-        # if it fails we get message
-        if request.success?
-          ActiveMerchant::Billing::Response.new(true, "", {}, {})
-        else 
-          ActiveMerchant::Billing::Response.new(false, request.parsed_response['message'][0...255], {}, {})
-        end
-      else
-        ActiveMerchant::Billing::Response.new(false, Spree.t(:mirakl_transaction_not_found), {}, {})
-      end
-    end
+      return ActiveMerchant::Billing::Response.new(false, Spree.t(:mirakl_transaction_not_found), {}, {}) unless transaction.present?
 
-    def taxes_json(taxes)
-      json_data = []
-      taxes.each do |tax|
-        # We divide by quantity causes taxes come over on a per line item basis. If an order has 2 and we return one only half taxes should go back
-        json_data << {
-          'amount': tax.amount.to_f,
-          'code': tax.code
-        }
-      end
-      return json_data
-    end
+      request = SpreeMirakl::Api.new(transaction.mirakl_store).cancel(transaction.mirakl_order_id)
 
+      success = request.success?
+      message = success ? '' : request.parsed_response['message'][0...255]
+      # We have to do it this way because if it is a success parsed response will have refunds
+      # if it fails we get message
+      ActiveMerchant::Billing::Response.new(success, message, {}, {})
+    end
   end
 end
