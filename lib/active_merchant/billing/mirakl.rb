@@ -73,7 +73,7 @@ module ActiveMerchant #:nodoc:
           return_json << {  amount: return_item.total,
                             order_line_id: order_line_data[:order_line_id],
                             shipping_amount: order_line_data[:shipping_price]/return_item.inventory_unit.line_item.order.item_count,
-                            reason_code: transaction.mirakl_store.mirakl_refund_reasons.joins(:return_authorization_reasons).where(spree_return_authorization_reasons: { id: return_item.return_authorization.return_authorization_reason_id }).first.try(:code),
+                            reason_code: transaction.mirakl_store.mirakl_refund_reasons.joins(:return_authorization_reasons).where(spree_return_authorization_reasons: { id: return_item.return_authorization.return_authorization_reason_id }).first.try(:code) || transaction.mirakl_store.mirakl_refund_reasons.first.code,
                             taxes: taxes_json(order_line_data[:taxes], line_item_quantity),
                             shipping_taxes: taxes_json(order_line_data[:shipping_taxes], line_item_quantity),
                             quantity: 1,
