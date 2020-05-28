@@ -39,6 +39,7 @@ module Mirakl
           Rails.logger.error Spree.t(:sku_missing, sku: offer_data[:shop_sku])
         end
       end
+
       if @update_json.present?
         response = SpreeMirakl::Api.new(@store).update_offers(@update_json)
         raise ServiceError.new([Spree.t(:inventory_update_issue, response: response)]) unless response.success?

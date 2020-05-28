@@ -21,12 +21,12 @@ module Spree
                 @mirakl_store.update(shop_id: JSON.parse(request.body, symbolize_names: true)[:shop_id])
                 reasons_request_sync(mirakl_request)
               else
-                raise Expection(Spree.t(:shop_id_issue))
+                raise Exception.new(Spree.t(:shop_id_issue))
               end
               flash[:success] = Spree.t(:mirakl_store_created)
               redirect_to admin_mirakl_stores_path
             else
-             raise Expection(@mirakl_store.errors.full_messages)
+             raise Exception.new(@mirakl_store.errors.full_messages)
             end
           end
         rescue => e
