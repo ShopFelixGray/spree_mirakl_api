@@ -16,3 +16,16 @@ en:
     sync_refund_reasons: ReSync Refund Reasons
     mirakl_store_cant_be_destroyed: Cannot destroy. Store has orders. Please switch to inactive instead to turn off the store
     mirakl_transaction_not_found: Could not find Mirakl Transaction
+    sync_refund_issue: Issue syncing Refund Reasons. Please try again
+    shop_id_error: Issue getting shop ID. Please try again
+    refresh_queued: Refresh Inventory Count Queued
+    updated: Updated
+    sync_inventory_fail: "Issue with updating inventory for store: %{shop_id}"
+    shipping_fail: Issue with pushing tracking info to Mirakl. Confirm in Mirakl tracking info exist and item is shipped
+    could_not_complete_order: "Could not complete order %{message}"
+    error_requesting_waiting_and_shipping: Error in getting Waiting Acceptance and Shipping
+    order_process_error: "Error processing order: %{order_id}"
+    issue_acceptance: "Issue Processing %{order_id} can fulfill but request issue"
+    issue_requesting_offers: "Error in getting Mirakl Offers for shop id: {%shop_id}"
+    sku_missing: "Couldn't find variant sku: %{sku}"
+    inventory_update_issue: "Issue updating inventory: %{response}"

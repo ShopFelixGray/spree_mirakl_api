@@ -23,7 +23,7 @@ module Mirakl
 
     def get_orders(store)
       request = SpreeMirakl::Api.new(store).get_order_state("WAITING_ACCEPTANCE,SHIPPING")
-      raise ServiceError.new(["Error in getting Waiting Acceptance and Shipping"]) unless request.success?
+      raise ServiceError.new([Spree.t(:error_requesting_waiting_and_shipping)]) unless request.success?
       JSON.parse(request.body, symbolize_names: true)[:orders]
     end
 
@@ -38,7 +38,7 @@ module Mirakl
           accept_or_reject_order(order, can_fulfill, store)
         elsif order[:order_state] == 'SHIPPING' # do elsif just to be safe not making double order
           order_service = Mirakl::BuildOrder.new(mirakl_order_id: order[:order_id], store: store)
-          raise ServiceError.new(["Error processing order: #{order[:order_id]}", order_service.errors]) unless order_service.call
+          raise ServiceError.new([Spree.t(:order_process_error, order_id: order[:order_id]), order_service.errors]) unless order_service.call
         end
       end
     end
@@ -48,9 +48,9 @@ module Mirakl
 
       if request.success? && can_fulfill
         order_service = Mirakl::BuildOrder.new(mirakl_order_id: order[:order_id], store: store)
-        raise ServiceError.new(["Error processing order: #{order[:order_id]}", order_service.errors]) unless order_service.call
+        raise ServiceError.new([Spree.t(:order_process_error, order_id: order[:order_id]), order_service.errors]) unless order_service.call
       elsif !request.success?
-        raise ServiceError.new(["Issue Processing #{order[:order_id]} can fulfill but request issue"])
+        raise ServiceError.new([Spree.t(:issue_acceptance, order_id: order[:order_id])])
       end
     end
 

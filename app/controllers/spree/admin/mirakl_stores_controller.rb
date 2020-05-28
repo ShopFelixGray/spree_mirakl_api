@@ -23,12 +23,12 @@ module Spree
               refund_creates(refund_types)
             else
               @mirakl_store.destory
-              flash[:error] = 'Issue syncing Refund Reasons. Please try again'
+              flash[:error] = Spree.t(:sync_refund_issue)
               render :new
             end
           else
             @mirakl_store.destory
-            flash[:error] = 'Issue getting shop ID. Please try again'
+            flash[:error] = Spree.t(:shop_id_issue)
             render :new
           end
           flash[:success] = Spree.t(:mirakl_store_created)
@@ -75,7 +75,7 @@ module Spree
             end
           end
         else
-          flash[:error] = 'Issue syncing Refund Reasons. Please try again'
+          flash[:error] = Spree.t(:sync_refund_issue)
           redirect_to admin_mirakl_stores_path
         end
       end
@@ -88,7 +88,7 @@ module Spree
               @mirakl_refund_reason.update(refund_reason_ids: params[:refund_reason].select{|key, hash|  hash == @mirakl_refund_reason.id.to_s }.keys)
             end
           end
-          flash[:notice] = 'Updated'
+          flash[:notice] = Spree.t(:updated)
         rescue => e
           flash[:error] = e.message
         end
@@ -97,7 +97,7 @@ module Spree
     
       def refresh_inventory
         MiraklInventoryUpdateJob.perform_later(params[:mirakl_store_id])
-        flash[:notice] = 'Refresh Queued'
+        flash[:notice] = Spree.t(:refresh_queued)
         redirect_to admin_mirakl_stores_path
       end
     

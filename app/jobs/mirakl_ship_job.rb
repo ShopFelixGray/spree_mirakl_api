@@ -11,7 +11,7 @@ class MiraklShipJob < ActiveJob::Base
                                       shipment.tracking_url)
     ship_request = mirakl_request.ship(order_id)
     unless request.success? && ship_request.success?
-      raise Exception.new('Issue with pushing tracking info to Mirakl. Confirm in Mirakl tracking info exist and item is shipped')
+      raise Exception.new(Spree.t(:shipping_fail))
     end
   end
 end

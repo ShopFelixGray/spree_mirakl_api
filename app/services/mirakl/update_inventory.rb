@@ -22,7 +22,7 @@ module Mirakl
 
     def get_offers
       response = SpreeMirakl::Api.new(@store).offers()
-      raise ServiceError.new(["Error in getting Mirakl Orders for shop id: #{@store.shop_id}"]) unless response.success?
+      raise ServiceError.new([Spree.t(:issue_requesting_offers, shop_id: @store.shop_id)]) unless response.success?
       JSON.parse(response.body, symbolize_names: true)[:offers]
     end
 
@@ -33,50 +33,34 @@ module Mirakl
         if response.success?
           offer_data = JSON.parse(response.body, symbolize_names: true)
           variant = Spree::Variant.find_by(sku: offer_data[:shop_sku])
-          if variant.present?
-            @update_json << {
-              all_prices: offer_data[:all_prices],
-              allow_quote_requests: offer_data[:allow_quote_requests],
-              available_ended: offer_data[:available_ended],
-              available_started: offer_data[:available_started],
-              description: offer_data[:description],
-              internal_description: offer_data[:internal_description],
-              price: variant.price,
-              product_id: offer_data[:product_id],
-              product_id_type: offer_data[:product_id_type],
-              product_tax_code: offer_data[:product_tax_code],
-              quantity: variant.quantity_check,
-              shop_sku: offer_data[:shop_sku],
-              state_code: offer_data[:state_code],
-              update_delete: 'update'
-            }
-          else
-            # Update the item to out of stock because we dont have the SKU and throw an error
-            @update_json << {
-              all_prices: offer_data[:all_prices],
-              allow_quote_requests: offer_data[:allow_quote_requests],
-              available_ended: offer_data[:available_ended],
-              available_started: offer_data[:available_started],
-              description: offer_data[:description],
-              internal_description: offer_data[:internal_description],
-              price: offer_data[:price],
-              product_id: offer_data[:product_id],
-              product_id_type: offer_data[:product_id_type],
-              product_tax_code: offer_data[:product_tax_code],
-              quantity: 0,
-              shop_sku: offer_data[:shop_sku],
-              state_code: offer_data[:state_code],
-              update_delete: 'update'
-            }
-            Rails.logger.error "Couldn't find variant sku: #{offer_data[:shop_sku]}"
-          end
+          @update_json << update_inventory_json(variant, offer_data)
+          Rails.logger.error Spree.t(:sku_missing, sku: offer_data[:shop_sku]) unless  variant.present?
         else
-          Rails.logger.error "Couldn't find variant sku: #{offer[:shop_sku]}"
+          Rails.logger.error Spree.t(:sku_missing, sku: offer_data[:shop_sku])
         end
       end
 
       response = SpreeMirakl::Api.new(@store).update_offers(@update_json)
-      raise ServiceError.new(["Issue updating inventory: #{response}"]) unless response.success?
+      raise ServiceError.new([Spree.t(:inventory_update_issue, response: response)]) unless response.success?
+    end
+
+    def update_inventory_json(variant, offer_data)
+      {
+        all_prices: offer_data[:all_prices],
+        allow_quote_requests: offer_data[:allow_quote_requests],
+        available_ended: offer_data[:available_ended],
+        available_started: offer_data[:available_started],
+        description: offer_data[:description],
+        internal_description: offer_data[:internal_description],
+        price: variant.present? ? variant.price : offer_data[:price],
+        product_id: offer_data[:product_id],
+        product_id_type: offer_data[:product_id_type],
+        product_tax_code: offer_data[:product_tax_code],
+        quantity: variant.present? ? variant.quantity_check : 0,
+        shop_sku: offer_data[:shop_sku],
+        state_code: offer_data[:state_code],
+        update_delete: 'update'
+      }
     end
 
   end

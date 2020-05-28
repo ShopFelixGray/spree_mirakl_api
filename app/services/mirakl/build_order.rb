@@ -49,7 +49,7 @@ module Mirakl
 
         @order = new_order
         unless new_order.complete?
-          raise ServiceError.new(["Could not complete order: #{e.message}"])
+          raise ServiceError.new([Spree.t(:could_not_complete_order, message: new_order.errors.full_messages)])
         end
       end
     end
