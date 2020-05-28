@@ -10,31 +10,27 @@ module Spree
       end
     
       def create
-        @mirakl_store = Spree::MiraklStore.new(mirakl_store_params)
-    
-        if @mirakl_store.save
-          mirakl_request = SpreeMirakl::Api.new(@mirakl_store)
-          request = mirakl_request.account
-          if request.success?
-            @mirakl_store.update(shop_id: JSON.parse(request.body, symbolize_names: true)[:shop_id])
-            reasons_request = mirakl_request.refund_reasons()
-            if reasons_request.success?
-              refund_types = JSON.parse(reasons_request.body, symbolize_names: true)[:reasons]
-              refund_creates(refund_types)
+        begin
+          ActiveRecord::Base.transaction do
+            @mirakl_store = Spree::MiraklStore.new(mirakl_store_params)
+        
+            if @mirakl_store.save
+              mirakl_request = SpreeMirakl::Api.new(@mirakl_store)
+              request = mirakl_request.account
+              if request.success?
+                @mirakl_store.update(shop_id: JSON.parse(request.body, symbolize_names: true)[:shop_id])
+                reasons_request_sync(mirakl_request)
+              else
+                raise Expection(Spree.t(:shop_id_issue))
+              end
+              flash[:success] = Spree.t(:mirakl_store_created)
+              redirect_to admin_mirakl_stores_path
             else
-              @mirakl_store.destory
-              flash[:error] = Spree.t(:sync_refund_issue)
-              render :new
+             raise Expection(@mirakl_store.errors.full_messages)
             end
-          else
-            @mirakl_store.destory
-            flash[:error] = Spree.t(:shop_id_issue)
-            render :new
           end
-          flash[:success] = Spree.t(:mirakl_store_created)
-          redirect_to admin_mirakl_stores_path
-        else
-          flash[:error] = @mirakl_store.errors.full_messages
+        rescue => e
+          flash[:error] = e.message
           render :new
         end
       end
@@ -109,6 +105,16 @@ module Spree
     
       def mirakl_store_params
         params.require(:mirakl_store).permit(:name, :api_key, :url, :active, :user_id)
+      end
+
+      def reasons_request_sync(mirakl_request)
+        reasons_request = mirakl_request.refund_reasons()
+        if reasons_request.success?
+          refund_types = JSON.parse(reasons_request.body, symbolize_names: true)[:reasons]
+          refund_creates(refund_types)
+        else
+          raise Expection(Spree.t(:sync_refund_issue))
+        end
       end
     
       def refund_creates(refund_types)
