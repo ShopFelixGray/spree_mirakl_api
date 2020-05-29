@@ -109,21 +109,21 @@ module ActiveMerchant #:nodoc:
       end
 
       def combine_order_lines(return_json)
-        new_json_arrary = []
+        combined_json = []
         return_json.each do |refund_json|
           found_match = false
-          new_json_arrary.each do |new_refund|
+          combined_json.each do |new_refund|
             if new_refund[:order_line_id] == refund_json[:order_line_id]
               new_refund_hash = combine_hashes(new_refund, refund_json)
-              index = new_json_arrary.index {|hash| hash[:order_line_id] == new_refund[:order_line_id] }
-              new_json_arrary[index] = new_refund_hash
+              index = combined_json.index {|hash| hash[:order_line_id] == new_refund[:order_line_id] }
+              combined_json[index] = new_refund_hash
               found_match = true
             end
           end
 
-          new_json_arrary << refund_json unless found_match
+          combined_json << refund_json unless found_match
         end
-        new_json_arrary
+        combined_json
       end
 
       def combine_hashes(base_refund, added_refund)

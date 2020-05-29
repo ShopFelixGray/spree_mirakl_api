@@ -5,11 +5,11 @@
       <th>Spree Reason</th>
       <th>Mirakl Reason</th>
     </tr>
-    <%= fields_for :retrun_authorization_reason do |form| %>
-      <% Spree::ReturnAuthorizationReason.all.each do |retrun_authorization_reason| %>
+    <%= fields_for :return_authorization_reason do |form| %>
+      <% Spree::ReturnAuthorizationReason.all.each do |return_authorization_reason| %>
         <tr>
-          <td><%= label_tag "#{retrun_authorization_reason.name}:" %></td>
-          <td><%= form.select retrun_authorization_reason.id, options_for_select(@mirakl_store.mirakl_refund_reasons.all.collect{ |u| [u.label, u.id] }, @mirakl_store.mirakl_refund_reasons.joins(:return_authorization_reasons).where(spree_return_authorization_reasons: { id: retrun_authorization_reason.id }).first.try(:id) ) %></td>
+          <td><%= label_tag "#{return_authorization_reason.name}:" %></td>
+          <td><%= form.select return_authorization_reason.id, options_for_select(@mirakl_store.mirakl_refund_reasons.all.collect{ |u| [u.label, u.id] }, @mirakl_store.mirakl_refund_reasons.joins(:return_authorization_reasons).where(spree_return_authorization_reasons: { id: return_authorization_reason.id }).first.try(:id) ) %></td>
         </tr>
       <% end %>
     <% end %>
