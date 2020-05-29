@@ -81,7 +81,7 @@ module Spree
           Spree::ReturnAuthorizationReason.all.each do |return_authorization_reason|
             if params[:return_authorization_reason][return_authorization_reason.id.to_s]
               @mirakl_refund_reason = Spree::MiraklRefundReason.find(params[:return_authorization_reason][return_authorization_reason.id.to_s])
-              @mirakl_refund_reason.update(return_authorization_reason: params[:return_authorization_reason].select{|key, hash|  hash == @mirakl_refund_reason.id.to_s }.keys)
+              @mirakl_refund_reason.update(return_authorization_reason_ids: params[:return_authorization_reason].select{|key, hash|  hash == @mirakl_refund_reason.id.to_s }.keys)
             end
           end
           flash[:notice] = Spree.t(:updated)
