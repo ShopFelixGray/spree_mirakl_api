@@ -61,7 +61,7 @@ module Spree
       end
     
       def reason_mapper
-        @mirakl_store = Spree::MiraklStore.includes(mirakl_refund_reasons: [:refund_reasons]).find(params[:mirakl_store_id])
+        @mirakl_store = Spree::MiraklStore.includes(mirakl_refund_reasons: [:return_authorization_reasons]).find(params[:mirakl_store_id])
         reasons_request = SpreeMirakl::Api.new(@mirakl_store).refund_reasons()
         if reasons_request.success?
           refund_types = JSON.parse(reasons_request.body, symbolize_names: true)[:reasons]
