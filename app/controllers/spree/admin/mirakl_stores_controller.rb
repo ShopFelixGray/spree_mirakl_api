@@ -36,7 +36,7 @@ module Spree
       end
     
       def edit
-        @mirakl_store = Spree::MiraklStore.includes(mirakl_refund_reasons: [:refund_reasons]).find(params[:id])
+        @mirakl_store = Spree::MiraklStore.includes(mirakl_refund_reasons: [:return_authorization_reasons]).find(params[:id])
       end
     
       def update
@@ -100,7 +100,7 @@ module Spree
       private
     
       def set_mirakl_store
-        @mirakl_store = Spree::MiraklStore.includes(mirakl_refund_reasons: [:refund_reasons]).find(params[:id])
+        @mirakl_store = Spree::MiraklStore.includes(mirakl_refund_reasons: [:return_authorization_reasons]).find(params[:id])
       end
     
       def mirakl_store_params
