@@ -78,10 +78,10 @@ module Spree
     
       def map_refunds
         begin
-          Spree::ReturnAuthorizationReason.all.each do |refund_reason|
-            if params[:refund_reason][refund_reason.id.to_s]
-              @mirakl_refund_reason = Spree::MiraklRefundReason.find(params[:refund_reason][refund_reason.id.to_s])
-              @mirakl_refund_reason.update(return_authorization_reason_ids: params[:refund_reason].select{|key, hash|  hash == @mirakl_refund_reason.id.to_s }.keys)
+          Spree::ReturnAuthorizationReason.all.each do |return_authorization_reason|
+            if params[:return_authorization_reason][return_authorization_reason.id.to_s]
+              @mirakl_refund_reason = Spree::MiraklRefundReason.find(params[:return_authorization_reason][return_authorization_reason.id.to_s])
+              @mirakl_refund_reason.update(return_authorization_reason: params[:return_authorization_reason].select{|key, hash|  hash == @mirakl_refund_reason.id.to_s }.keys)
             end
           end
           flash[:notice] = Spree.t(:updated)
