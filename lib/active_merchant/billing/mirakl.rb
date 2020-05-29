@@ -80,7 +80,8 @@ module ActiveMerchant #:nodoc:
                             currency_iso_code: transaction.order.currency
                           }
         end
-        request = SpreeMirakl::Api.new(transaction.mirakl_store).refund(return_json)
+        return_json_uniq = combine_order_lines(return_json)
+        request = SpreeMirakl::Api.new(transaction.mirakl_store).refund(return_json_uniq)
         # We have to do it this way because if it is a success parsed response will have refunds
         # if it fails we get message
         if request.success?
@@ -106,6 +107,54 @@ module ActiveMerchant #:nodoc:
         end
         json_data
       end
+
+      def combine_order_lines(return_json)
+        new_json_arrary = []
+        return_json.each do |refund_json|
+          found_match = false
+          new_json_arrary.each do |new_refund|
+            if new_refund[:order_line_id] == refund_json[:order_line_id]
+              new_refund_hash = combine_hashes(new_refund, refund_json)
+              index = new_json_arrary.index {|hash| hash[:order_line_id] == new_refund[:order_line_id] }
+              new_json_arrary[index] = new_refund_hash
+              found_match = true
+            end
+          end
+
+          new_json_arrary << refund_json unless found_match
+        end
+        new_json_arrary
+      end
+
+      def combine_hashes(base_refund, added_refund)
+        {
+          amount: base_refund[:amount].to_f + added_refund[:amount].to_f,
+          order_line_id: base_refund[:order_line_id],
+          shipping_amount: base_refund[:shipping_amount].to_f + added_refund[:shipping_amount].to_f,
+          reason_code:  base_refund[:reason_code],
+          taxes: tax_combine(base_refund[:taxes], added_refund[:taxes]),
+          shipping_taxes: tax_combine(base_refund[:shipping_taxes], added_refund[:shipping_taxes]),
+          quantity: base_refund[:quantity] + 1,
+          currency_iso_code: base_refund[:currency_iso_code]
+        }
+      end
+
+      def tax_combine(base_taxes, added_taxes)
+        new_taxes = []
+        # Because these taxes are from the same order line we can assume they will have the same codes
+        base_taxes.each do |base_tax|
+          added_taxes.each do |added_tax|
+            if base_tax[:code] == added_tax[:code]
+              new_taxes << {
+                amount: base_tax[:amount].to_f + added_tax[:amount].to_f,
+                code: base_tax[:code]
+              }
+            end
+          end
+        end
+        new_taxes
+      end
+
     end
   end
 end
