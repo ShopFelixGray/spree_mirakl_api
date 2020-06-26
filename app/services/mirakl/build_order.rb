@@ -7,6 +7,7 @@ module Mirakl
       @mirakl_order_id = args[:mirakl_order_id]
       @store = args[:store]
       @force_sync = args[:force_sync] || false
+      @order_total = 0
       @order = nil
     end
 
@@ -32,57 +33,49 @@ module Mirakl
       JSON.parse(request.body, symbolize_names: true)[:orders][0]
     end
 
-    def build_order_for_user(order_data, store)
-      ActiveRecord::Base.transaction do
-        new_order = Spree::Order.create!
-        new_order.associate_user!(store.user)
-        new_order.channel = 'mirakl'
-        new_order = add_line_items(new_order, order_data[:order_lines])
-        new_order.billing_address = build_address(order_data[:customer][:billing_address], new_order.user)
-        new_order.ship_address = build_address(order_data[:customer][:shipping_address], new_order.user)
-
-        while order_next(new_order)
-          if new_order.state == 'payment'
-            create_payment(new_order, new_order.total, order_data[:order_id], store)
-          end
-        end
-
-        @order = new_order
-        unless new_order.complete?
-          raise ServiceError.new([Spree.t(:could_not_complete_order, message: new_order.errors.full_messages)])
-        end
-      end
+    def get_order_hash(order_information, store)
+      # Source has to come after order is created
+      {
+        email: store.user.email,
+        channel: 'mirakl',
+        line_items_attributes: line_items_hash(order_information[:order_lines]),
+        completed_at: Time.current,
+        payments_attributes: [
+          {
+            amount: @order_total,
+            payment_method: 'Mirakl',
+            created_at: Time.current,
+            response_code: order_information[:order_id],
+            source: { mirakl_order_number: order_information[:order_id], mirakl_store_id: store.id }
+          }
+        ],
+        bill_address_attributes: build_address(order_information[:customer][:billing_address], store.user),
+        ship_address_attributes: build_address(order_information[:customer][:shipping_address], store.user)
+      }
     end
 
-    def add_line_items(order, order_lines)
+    def line_items_hash(order_lines)
+      line_items = []
       order_lines.each do |order_line|
-        variant = Spree::Variant.includes(:stock_items).find_by(sku: order_line[:offer_sku])
-        order.contents.add(variant, order_line[:quantity])
+        offer_sku = order_line[:offer_sku]
+        quantity = order_line[:quantity]
+
+        variant = Spree::Variant.includes(:stock_items).active.find_by(sku: offer_sku)
+        raise ServiceError.new(["Issue finding #{offer_sku}"]) unless variant.present?
+
+        @order_total += (variant.price * quantity)
+        line_items << { sku: variant.sku, quantity: quantity, price: variant.price }
       end
-      order
+      line_items
+    end
+
+    def build_order_for_user(order_data, store)
+      @order = Spree::Core::Importer::Mirakl::Order.import(store.user, get_order_hash(order_data, store))
     end
 
     def build_address(address, user)
       SpreeMirakl::Address.new(address, user).build_address
     end
 
-    def create_payment(order, amount, mirakl_order_number, store)
-      payment = order.payments.build order: order
-      payment.amount = amount
-      payment.state =  'completed'
-      payment.created_at = Time.current()
-      payment.payment_method = Spree::PaymentMethod.find_by_name!('Mirakl')
-      payment.response_code = mirakl_order_number
-      payment.source = Spree::MiraklTransaction.create!(order: order,
-                                                        mirakl_order_id: mirakl_order_number,
-                                                        mirakl_store: store
-                                                       )
-      raise ServiceError.new([e.message]) unless payment.save
-    end
-
-    def order_next(order)
-      order.temporary_address = true
-      order.next
-    end
   end
 end

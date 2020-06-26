@@ -237,20 +237,6 @@ module Mirakl
         end
 
       end
-
-      describe 'when the inventory throws an error' do
-        before do
-          stub_request(:get, "#{store.url}/api/offers/test?shop_id=#{store.shop_id}").
-            to_return(status: 200, body: offer_data, headers: {})
-          stub_request(:post, "#{store.url}/api/offers?shop_id=#{store.shop_id}").
-            to_return(status: 403, headers: {})
-        end
-
-        it 'throws an error correctly' do
-          service.call
-          expect(service.errors).to eq(['Issue updating inventory: '])
-        end
-      end
     end
 
   end
