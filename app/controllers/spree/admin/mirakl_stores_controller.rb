@@ -36,7 +36,7 @@ module Spree
       end
     
       def edit
-        @mirakl_store = Spree::MiraklStore.includes(mirakl_refund_reasons: [:refund_reasons]).find(params[:id])
+        @mirakl_store = Spree::MiraklStore.includes(mirakl_refund_reasons: [:return_authorization_reasons]).find(params[:id])
       end
     
       def update
@@ -61,7 +61,7 @@ module Spree
       end
     
       def reason_mapper
-        @mirakl_store = Spree::MiraklStore.includes(mirakl_refund_reasons: [:refund_reasons]).find(params[:mirakl_store_id])
+        @mirakl_store = Spree::MiraklStore.includes(mirakl_refund_reasons: [:return_authorization_reasons]).find(params[:mirakl_store_id])
         reasons_request = SpreeMirakl::Api.new(@mirakl_store).refund_reasons()
         if reasons_request.success?
           refund_types = JSON.parse(reasons_request.body, symbolize_names: true)[:reasons]
@@ -78,10 +78,10 @@ module Spree
     
       def map_refunds
         begin
-          Spree::RefundReason.all.each do |refund_reason|
-            if params[:refund_reason][refund_reason.id.to_s]
-              @mirakl_refund_reason = Spree::MiraklRefundReason.find(params[:refund_reason][refund_reason.id.to_s])
-              @mirakl_refund_reason.update(refund_reason_ids: params[:refund_reason].select{|key, hash|  hash == @mirakl_refund_reason.id.to_s }.keys)
+          Spree::ReturnAuthorizationReason.all.each do |return_authorization_reason|
+            if params[:return_authorization_reason][return_authorization_reason.id.to_s]
+              @mirakl_refund_reason = Spree::MiraklRefundReason.find(params[:return_authorization_reason][return_authorization_reason.id.to_s])
+              @mirakl_refund_reason.update(return_authorization_reason_ids: params[:return_authorization_reason].select{|key, hash|  hash == @mirakl_refund_reason.id.to_s }.keys)
             end
           end
           flash[:notice] = Spree.t(:updated)
@@ -100,7 +100,7 @@ module Spree
       private
     
       def set_mirakl_store
-        @mirakl_store = Spree::MiraklStore.includes(mirakl_refund_reasons: [:refund_reasons]).find(params[:id])
+        @mirakl_store = Spree::MiraklStore.includes(mirakl_refund_reasons: [:return_authorization_reasons]).find(params[:id])
       end
     
       def mirakl_store_params
