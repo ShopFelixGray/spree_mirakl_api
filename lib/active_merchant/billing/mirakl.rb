@@ -46,7 +46,7 @@ module ActiveMerchant #:nodoc:
           order_line_data = nil
           order_data[:order_lines].each do |order_line|
             # See if the sku for the order line matches the return item
-            if order_line[:offer_sku] == inventory_unit_sku
+            if order_line[:offer_sku].downcase == inventory_unit_sku.downcase
               # If it does then we check if this line item already has returns on it
               # Because we do returns by unit the refunds array should repersent inventory unit
               # Because we maybe returning multiple units on the same line item we want to make sure we keep an accruate account
