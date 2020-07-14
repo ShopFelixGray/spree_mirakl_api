@@ -39,7 +39,7 @@ module Mirakl
         email: store.user.email,
         channel: 'mirakl',
         line_items_attributes: line_items_hash(order_information[:order_lines]),
-        completed_at: Time.current,
+        completed_at: order_data[:created_date],
         payments_attributes: [
           {
             amount: @order_total,
