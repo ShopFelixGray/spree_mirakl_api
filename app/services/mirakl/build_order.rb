@@ -16,6 +16,7 @@ module Mirakl
         # If order already exist we dont want to remake it. We may want to alert admin some how with an email
         unless Spree::MiraklTransaction.find_by(mirakl_order_id: @mirakl_order_id).present?
           order_data = get_order(@mirakl_order_id, @store)
+          puts order_data
           if order_data[:order_state] == 'SHIPPING' || @force_sync
             build_order_for_user(order_data, @store)
           end
