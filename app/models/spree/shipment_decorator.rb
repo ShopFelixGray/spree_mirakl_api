@@ -12,4 +12,12 @@ Spree::Shipment.class_eval do
     order_id = order.mirakl_transaction.mirakl_order_id
     MiraklShipJob.perform_later store.id, order_id, self.id
   end
+
+  def mirakl_tracking_url
+    self.tracking_url
+  end
+
+  def shipping_carrier_name
+    shipping_method.name.split(' ').try(:first)
+  end
 end

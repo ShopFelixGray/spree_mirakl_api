@@ -6,8 +6,8 @@ class SpreeMirakl::Api
     @response = nil
   end
 
-  def tracking(mirakl_order_id, shipping_method, tracking_url)
-    @response = SpreeMirakl::Request.new(@store).put("/api/orders/#{mirakl_order_id}/tracking?shop_id=#{@store.shop_id}",({  carrier_name: shipping_method.try(:name), carrier_url: tracking_url }).to_json)
+  def tracking(mirakl_order_id, shipping_info)
+    @response = SpreeMirakl::Request.new(@store).put("/api/orders/#{mirakl_order_id}/tracking?shop_id=#{@store.shop_id}", shipping_info)
   end
 
   def ship(mirakl_order_id)

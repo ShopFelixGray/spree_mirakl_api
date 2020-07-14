@@ -33,8 +33,7 @@ module SpreeMirakl
         @address_data = @address_data.merge(user: @user, default: false)
       end
 
-      @address = Spree::Address.create!(@address_data)
-      @address
+      @address_data
     end
 
     def get_country_for(country_iso)
@@ -51,5 +50,6 @@ module SpreeMirakl
                     phone_number.length > 15
       phone_number
     end
+
   end
 end
