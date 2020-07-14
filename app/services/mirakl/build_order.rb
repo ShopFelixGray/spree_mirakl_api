@@ -39,7 +39,7 @@ module Mirakl
         email: store.user.email,
         channel: 'mirakl',
         line_items_attributes: line_items_hash(order_information[:order_lines]),
-        completed_at: order_data[:created_date],
+        completed_at: order_information[:created_date],
         payments_attributes: [
           {
             amount: @order_total,
@@ -71,6 +71,7 @@ module Mirakl
 
     def build_order_for_user(order_data, store)
       @order = Spree::Core::Importer::Mirakl::Order.import(store.user, get_order_hash(order_data, store))
+      @order.shipments.each(&:finalize!) # This is required to decrease inventory
     end
 
     def build_address(address, user)

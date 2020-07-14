@@ -10,7 +10,7 @@ class MiraklShipJob < ActiveJob::Base
     raise ServiceError.new(["Issue getting #{order_id}"]) unless get_order.success?
 
     order_data = JSON.parse(get_order.body, symbolize_names: true)[:orders][0]
-    shipping_name = shipment.shipping_method.name.split(' ').try(:first)
+    shipping_name = shipment.shipping_carrier_name
 
     if %W['FEDEX','UPS','USPS'].include?(shipping_name.upcase)
       # registered carrier

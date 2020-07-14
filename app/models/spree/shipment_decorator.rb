@@ -16,4 +16,8 @@ Spree::Shipment.class_eval do
   def mirakl_tracking_url
     self.tracking_url
   end
+
+  def shipping_carrier_name
+    shipping_method.name.split(' ').try(:first)
+  end
 end
