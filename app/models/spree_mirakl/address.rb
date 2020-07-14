@@ -51,6 +51,5 @@ module SpreeMirakl
       phone_number
     end
 
-    
   end
 end
