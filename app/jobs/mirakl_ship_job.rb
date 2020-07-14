@@ -17,7 +17,7 @@ class MiraklShipJob < ActiveJob::Base
       shipping_info = { carrier_code: shipping_name, tracking_number: shipment.tracking }
     else
       # Unregistered shipping carrier
-      shipping_info = { carrier_name: shipping_name, tracking_number: shipment.tracking, carrier_url: shipment.tracking_url }
+      shipping_info = { carrier_name: shipping_name, tracking_number: shipment.tracking, carrier_url: shipment.mirakl_tracking_url }
     end
 
     request = mirakl_request.tracking(order_id,
