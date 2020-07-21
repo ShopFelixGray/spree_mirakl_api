@@ -75,7 +75,7 @@ module Spree
           redirect_to admin_mirakl_stores_path
         end
       end
-    
+
       def map_refunds
         begin
           Spree::ReturnAuthorizationReason.all.each do |return_authorization_reason|
