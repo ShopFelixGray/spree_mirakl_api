@@ -20,14 +20,14 @@ class MiraklShipJob < ActiveJob::Base
       shipping_info = { carrier_name: shipping_name, tracking_number: shipment.tracking, carrier_url: shipment.mirakl_tracking_url }
     end
 
+    request = mirakl_request.tracking(order_id,
+      shipping_info.to_json)
+
     # If an order is already marked as shipped dont reship it
     if order_data[:order_state] != 'SHIPPED'
       ship_request = mirakl_request.ship(order_id)
       raise Exception.new(Spree.t(:shipping_fail)) unless ship_request.success?
-    end
-
-    request = mirakl_request.tracking(order_id,
-                                      shipping_info.to_json)
+    end    
 
     raise Exception.new(Spree.t(:shipping_fail)) unless request.success?
   end
