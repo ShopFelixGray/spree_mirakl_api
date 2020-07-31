@@ -24,14 +24,14 @@ module ActiveMerchant #:nodoc:
         ActiveMerchant::Billing::Response.new(true, "", {}, {})
       end
 
-      def refund(money, mirakl_source, options = {})
-        credit(money, mirakl_source, options)
+      def refund(money, response_code, options = {})
+        credit(money, response_code, options)
       end
 
-      def credit(money, mirakl_source, options = {})
+      def credit(money, response_code, options = {})
         refund = options[:originator]
         return_json = []
-        transaction = Spree::MiraklTransaction.find_by(mirakl_order_id: mirakl_source)
+        transaction = Spree::MiraklTransaction.find_by(mirakl_order_id: response_code)
 
         request = SpreeMirakl::Api.new(transaction.mirakl_store).get_order(transaction.mirakl_order_id)
 

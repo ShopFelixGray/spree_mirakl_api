@@ -12,7 +12,7 @@ class MiraklShipJob < ActiveJob::Base
     order_data = JSON.parse(get_order.body, symbolize_names: true)[:orders][0]
     shipping_name = shipment.shipping_carrier_name
 
-    if %W['FEDEX','UPS','USPS'].include?(shipping_name.upcase)
+    if ['FEDEX','UPS','USPS'].include?(shipping_name.upcase)
       # registered carrier
       shipping_info = { carrier_code: shipping_name, tracking_number: shipment.tracking }
     else
@@ -22,8 +22,9 @@ class MiraklShipJob < ActiveJob::Base
 
     request = mirakl_request.tracking(order_id,
                                       shipping_info.to_json)
-    # If an order is already marked as shipped dont reship it
-    if order_data[:order_state] != 'SHIPPING'
+
+    # Only ship if in shipping state
+    if order_data[:order_state] == 'SHIPPING'
       ship_request = mirakl_request.ship(order_id)
       raise Exception.new(Spree.t(:shipping_fail)) unless ship_request.success?
     end
