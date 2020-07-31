@@ -20,8 +20,9 @@ module Spree
       '1.0'
     end
 
-    def cancel(mirakl_source, _options = {})
-      transaction = Spree::MiraklTransaction.find_by(mirakl_order_id: mirakl_source)
+    def cancel(response_code, _options = {})
+      binding.pry
+      transaction = Spree::MiraklTransaction.find_by(mirakl_order_id: response_code)
 
       return ActiveMerchant::Billing::Response.new(false, Spree.t(:mirakl_transaction_not_found), {}, {}) unless transaction.present?
 
