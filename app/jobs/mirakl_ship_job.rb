@@ -11,13 +11,14 @@ class MiraklShipJob < ActiveJob::Base
 
     order_data = JSON.parse(get_order.body, symbolize_names: true)[:orders][0]
     shipping_name = shipment.shipping_carrier_name
+    carrier = store.mirakl_store_carriers.where(label: shipping_name.downcase).first
 
-    if ['FEDEX','UPS','USPS'].include?(shipping_name.upcase)
+    if carrier.present?
       # registered carrier
-      shipping_info = { carrier_code: shipping_name, tracking_number: shipment.tracking }
+      shipping_info = { carrier_code: carrier.code, tracking_number: shipment.tracking }
     else
       # Unregistered shipping carrier
-      shipping_info = { carrier_name: shipping_name, tracking_number: shipment.tracking, carrier_url: shipment.mirakl_tracking_url }
+      shipping_info = { tracking_number: shipment.tracking, carrier_url: shipment.mirakl_tracking_url }
     end
 
     request = mirakl_request.tracking(order_id,

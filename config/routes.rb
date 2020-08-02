@@ -3,6 +3,7 @@ Spree::Core::Engine.routes.draw do
   namespace :admin do
     resources :mirakl_stores do
       get :refresh_inventory
+      get :refresh_carriers
       get :reason_mapper
       put :map_refunds
     end

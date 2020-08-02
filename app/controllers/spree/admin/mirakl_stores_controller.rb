@@ -96,6 +96,13 @@ module Spree
         flash[:notice] = Spree.t(:refresh_queued)
         redirect_to admin_mirakl_stores_path
       end
+
+      def refresh_carriers
+        store = Spree::MiraklStore.find_by(params[:mirakl_store_id])
+        store.pull_in_store_carriers
+        flash[:notice] = Spree.t(:carriers_synced)
+        redirect_to admin_mirakl_stores_path
+      end
     
       private
     
