@@ -99,7 +99,7 @@ module Spree
 
       def refresh_carriers
         store = Spree::MiraklStore.find_by(params[:mirakl_store_id])
-        store.pull_in_store_carriers
+        store.get_carriers_from_mirakl
         flash[:notice] = Spree.t(:carriers_synced)
         redirect_to admin_mirakl_stores_path
       end

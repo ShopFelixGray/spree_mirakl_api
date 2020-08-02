@@ -10,7 +10,7 @@ module Spree
 
     scope :active, -> { where(active: true) }
 
-    after_create :pull_in_store_carriers
+    after_create :get_carriers_from_mirakl
 
     before_destroy :check_for_orders, prepend: true
 
@@ -21,7 +21,7 @@ module Spree
       false
     end
 
-    def pull_in_store_carriers
+    def get_carriers_from_mirakl
       mirakl_request = SpreeMirakl::Api.new(self)
       request = mirakl_request.carriers()
 
@@ -30,7 +30,6 @@ module Spree
       carriers = JSON.parse(request.body, {symbolize_names: true})[:carriers]
 
       carriers.each do |carrier|
-        puts carrier.to_json
         unless mirakl_store_carriers.where(label: carrier[:label].downcase).present?
           Spree::MiraklStoreCarrier.create!(label: carrier[:label].downcase, code: carrier[:code], mirakl_store: self)
         end
