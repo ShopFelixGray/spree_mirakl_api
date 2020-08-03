@@ -30,9 +30,7 @@ module Spree
       carriers = JSON.parse(request.body, {symbolize_names: true})[:carriers]
 
       carriers.each do |carrier|
-        unless mirakl_store_carriers.where(label: carrier[:label].downcase).present?
-          Spree::MiraklStoreCarrier.create!(label: carrier[:label].downcase, code: carrier[:code], mirakl_store: self)
-        end
+        Spree::MiraklStoreCarrier.find_or_create_by(label: carrier[:label].downcase, code: carrier[:code], mirakl_store: self)
       end
     end
   end
