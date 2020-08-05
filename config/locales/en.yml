@@ -27,5 +27,8 @@ en:
     order_process_error: "Error processing order: %{order_id}"
     issue_acceptance: "Issue Processing %{order_id} can fulfill but request issue"
     issue_requesting_offers: "Error in getting Mirakl Offers for shop id: %{shop_id}"
+    carrier_error: "Error getting carriers for shop id: %{shop_id}"
+    carriers_synced: "Carriers have been updated"
+    refresh_carriers: "Carrier Sync"
     sku_missing: "Couldn't find variant sku: %{sku}"
     inventory_update_issue: "Issue updating inventory: %{response}"

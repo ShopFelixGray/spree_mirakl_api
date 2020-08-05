@@ -1,7 +1,7 @@
 class Spree::Core::Importer::Mirakl::Order < Spree::Core::Importer::Order
   class << self
     # Override default create_payments because order requires response_code for Mirakl Orders
-    def self.create_payments_from_params(payments_hash, order)
+    def create_payments_from_params(payments_hash, order)
       return [] unless payments_hash
       payments_hash.each do |p|
         begin
