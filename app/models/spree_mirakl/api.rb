@@ -19,11 +19,15 @@ class SpreeMirakl::Api
   end
 
   def carriers
-    @response = SpreeMirakl::Request.new(@store).get("/api/shipping/carriers?shop_id=#{@store.shop_id}")
+    @response = SpreeMirakl::Request.new(@store).get("/api/shipping/carriers")
   end
 
   def refund_reasons
     @response = SpreeMirakl::Request.new(@store).get("/api/reasons/REFUND?shop_id=#{@store.shop_id}")
+  end
+
+  def shipping_options
+    @response = SpreeMirakl::Request.new(@store).get("/api/account?shop_id=#{@store.shop_id}")
   end
 
   def get_order(mirakl_order_id)

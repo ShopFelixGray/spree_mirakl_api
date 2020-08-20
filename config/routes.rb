@@ -6,6 +6,8 @@ Spree::Core::Engine.routes.draw do
       get :refresh_carriers
       get :reason_mapper
       put :map_refunds
+      get :shipping_mapper
+      put :map_shipping
     end
   end
 end

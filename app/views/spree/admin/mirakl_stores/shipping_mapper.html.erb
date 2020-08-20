@@ -1,0 +1,23 @@
+<h2><%= Spree.t(:shipping_mapping) %></h2>
+<%= form_tag(admin_mirakl_store_map_shipping_path(@mirakl_store),  method: :put) do |f| %>
+  <table style="border-collapse: separate;border-spacing: 10px;">
+    <tr>
+      <th>Mirakl Shipping Option</th>
+      <th>Spree Shipping Method</th>
+    </tr>
+    <%= fields_for :shipping_option do |form| %>
+      <% @mirakl_shipping_options.all.each do |shipping_option| %>
+        <tr>
+          <td><%= label_tag "#{shipping_option.shipping_type_label}:" %></td>
+          <td><%= form.select shipping_option.id, options_for_select(Spree::ShippingMethod.all.collect{ |u| [u.name, u.id] }, Spree::ShippingMethod.joins(:mirakl_shipping_options).where(spree_mirakl_shipping_options: { id: shipping_option.id }).first.try(:id) ) %></td>
+        </tr>
+      <% end %>
+    <% end %>
+  </table>
+  
+  <div class="form-actions" data-hook="buttons">
+    <%= button Spree.t('actions.update'), 'save' %>
+    <span class="or"><%= Spree.t(:or) %></span>
+    <%= button_link_to Spree.t('actions.cancel'), spree.admin_mirakl_stores_path(), id: 'cancel_link', icon: 'delete' %>
+  </div>
+<% end %> 

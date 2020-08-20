@@ -2,13 +2,15 @@ require 'spec_helper'
 
 module Mirakl
   RSpec.describe BuildOrder do
-    let!(:store) { create(:mirakl_store) }
+    let(:store) { create(:mirakl_store) }
 
     let!(:shipping_method) { create(:shipping_method) }
 
-    let!(:product) { create(:product_in_stock) }
+    let!(:product) { create(:product_in_stock, { sku: 'test-sku' }) }
 
     let!(:payment_method) { create(:mirakl_payment_method) }
+
+    let!(:shipping_method) { create(:shipping_method, { admin_name: 'default' })}
 
     let(:service_arguments) {{
       mirakl_order_id: 'test',
@@ -52,6 +54,7 @@ module Mirakl
             }
           },
           order_id: 'AP00561912-318661410-A',
+          created_date: Time.current,
           order_lines: [
             {
               offer_id: 2527,
@@ -101,17 +104,16 @@ module Mirakl
     before do
       Spree::State.create!(name: 'Washington D.C', abbr: 'DC', country: Spree::Country.first)
       Spree::ZoneMember.create!(zoneable_id: Spree::Country.first.id, zone: Spree::Zone.first, zoneable: Spree::Country.first)
-
+      
+      stub_request(:get, "https://test.com/api/shipping/carriers").to_return(status: 200, body: '{ "carriers": [] }', headers: {})
       stub_request(:get, "#{store.url}/api/orders?order_ids=test&shop_id=#{store.shop_id}").
         to_return(status: 200, body: order_data, headers: {})
     end
 
     describe 'CLASS' do
-
       it 'inherits from ApplicationService' do
         expect(described_class.superclass).to eq(ApplicationService)
       end
-
     end
 
     describe 'CALL' do
