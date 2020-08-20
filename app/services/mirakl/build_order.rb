@@ -34,7 +34,6 @@ module Mirakl
     end
 
     def get_order_hash(order_information, store)
-      
       # Source has to come after order is created
       {
         email: store.user.email,
@@ -88,13 +87,11 @@ module Mirakl
 
     def build_order_for_user(order_data, store)
       @order = Spree::Core::Importer::Mirakl::Order.import(store.user, get_order_hash(order_data, store))
-      puts @order.state
       @order.shipments.each(&:finalize!) # This is required to decrease inventory
       order_shipping_adjustment(@order, store, order_data)
     end
 
     def order_shipping_adjustment(order, store, order_data)
-      
       # Select the appropriate rate and make sure not to bill that amount
       # We can do this by creating an adjustment for the difference
       order.shipments.each do |shipment|
