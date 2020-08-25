@@ -51,7 +51,7 @@ module Mirakl
         ],
         shipments_attributes: [{
           stock_location: Spree::StockLocation.find_by(default: true)&.name || Spree::StockLocation.first.name,
-          shipping_method: (store.mirakl_shipping_options.where(shipping_type_label: order_information[:shipping_type_label]).first&.shipping_methods&.first&.name || 'default'),
+          shipping_method: order_shipping_method(order_information, store),
           inventory_units: define_inventory_units(order_information)
         }],
         bill_address_attributes: build_address(order_information[:customer][:billing_address], store.user),
@@ -59,6 +59,12 @@ module Mirakl
       }
     end
 
+    def order_shipping_method(order_information, store)
+      store.mirakl_shipping_options.where(shipping_type_label: order_information[:shipping_type_label]).first&.shipping_methods&.first&.name || 'default'
+    end
+
+    # We must define all the inventory units that will be associated with the shipment
+    # So if a line item has a quantity of 2 we must make 2 inventory units in the array
     def define_inventory_units(order_information)
       inventory_units = []
       order_information[:order_lines].each do |order_line|
@@ -96,7 +102,7 @@ module Mirakl
       # We can do this by creating an adjustment for the difference
       order.shipments.each do |shipment|
         updated_rate = shipment.shipping_rates.find_by(selected: true)
-        if updated_rate && updated_rate.cost
+        if updated_rate.present? && updated_rate.cost
           adjustment = order.adjustments.create!(order: order, label: 'Mirakl Shipping Discount', amount: -updated_rate.cost, state: 'closed')
         end
       end

@@ -4,13 +4,13 @@ module Mirakl
   RSpec.describe BuildOrder do
     let(:store) { create(:mirakl_store) }
 
-    let!(:shipping_method) { create(:shipping_method) }
-
     let!(:product) { create(:product_in_stock, { sku: 'test-sku' }) }
 
     let!(:payment_method) { create(:mirakl_payment_method) }
 
     let!(:shipping_method) { create(:shipping_method, { admin_name: 'default' })}
+
+    let!(:shipping_method_2) { create(:shipping_method, { name: 'two_day', admin_name: 'two_day' })}
 
     let(:service_arguments) {{
       mirakl_order_id: 'test',
@@ -196,6 +196,128 @@ module Mirakl
         it 'is a complete order' do
           service.send(:build_order_for_user, JSON.parse(order_data, symbolize_names: true)[:orders][0], store)
           expect(service.order.state).to eq('complete')
+        end
+
+        describe 'shipping matching' do
+          before do
+            shipping_method = Spree::ShippingMethod.find_by(admin_name: 'default')
+            calculator = Spree::Calculator::FlatRate.create(preferences: {currency: 'USD', amount: 10.0})
+            shipping_method.calculator = calculator
+          end
+
+          it 'selects the correct shipping method' do
+            service.send(:build_order_for_user, JSON.parse(order_data, symbolize_names: true)[:orders][0], store)
+            expect(service.order.shipments.first.shipping_method.id).to eq(shipping_method.id)
+          end
+
+          it 'has the correct shipping cost' do
+            service.send(:build_order_for_user, JSON.parse(order_data, symbolize_names: true)[:orders][0], store)
+            expect(service.order.shipment_total).to eq(10.0)
+          end
+
+          describe 'mirakl mapping works' do
+            let(:mirakl_shipping_option) { create(:mirakl_shipping_options, { mirakl_store: store })}
+
+            let(:order_data) {{
+              orders: [
+                {
+                  customer: {
+                    billing_address: {
+                      city: 'Washington',
+                      company: nil,
+                      country: 'US',
+                      country_iso_code: nil,
+                      firstname: 'AARON',
+                      lastname: 'FLORES',
+                      phone_secondary: '55555555',
+                      state: 'DC',
+                      street_1: '1600 Pennsylvania Ave NW',
+                      street_2: nil,
+                      zip_code: '20500'
+                    },
+                    firstname: 'AARON',
+                    lastname: 'FLORES',
+                    shipping_address: {
+                      additional_info: nil,
+                      city: 'Washington',
+                      company: nil,
+                      country: 'US',
+                      country_iso_code: nil,
+                      firstname: 'AARON',
+                      lastname: 'FLORES',
+                      phone_secondary: '555555555',
+                      state: 'DC',
+                      street_1: '1600 Pennsylvania Ave NW',
+                      street_2: nil,
+                      zip_code: '20500'
+                    }
+                  },
+                  shipping_type_label: 'abc',
+                  order_id: 'AP00561912-318661410-A',
+                  created_date: Time.current,
+                  order_lines: [
+                    {
+                      offer_id: 2527,
+                      offer_sku: product.sku,
+                      order_line_id: '201807130411578146106997',
+                      quantity: 2,
+                      received_date: '2020-05-04T19:57:41Z',
+                      shipping_taxes: [
+                        {
+                          amount: 0.30,
+                          amount_breakdown: {
+                            parts: [
+                              {
+                                amount: 0.30,
+                                commissionable: false,
+                                debitable_from_customer: true,
+                                payable_to_shop: true
+                              }
+                            ]
+                          },
+                          code: 'shipping-tax-amount'
+                        }
+                      ],
+                      taxes: [
+                        {
+                          amount: 0.72,
+                          amount_breakdown: {
+                            parts: [
+                              {
+                                amount: 0.72,
+                                commissionable: false,
+                                debitable_from_customer: true,
+                                payable_to_shop: true
+                              }
+                            ]
+                          },
+                          code: 'product-tax-amount'
+                        }
+                      ]
+                    }
+                  ],
+                  total_price: 194.95
+                }
+              ]
+            }.to_json}
+  
+            before do
+              shipping_method_2 = Spree::ShippingMethod.find_by(admin_name: 'two_day')
+              calculator_2 = Spree::Calculator::FlatRate.create(preferences: {currency: 'USD', amount: 30.0})
+              shipping_method_2.calculator = calculator_2
+              Spree::MiraklShippingOptionShippingMethod.create(shipping_method: shipping_method_2, mirakl_shipping_option: mirakl_shipping_option)
+            end
+
+            it 'applies the new shipping method cost' do
+              service.send(:build_order_for_user, JSON.parse(order_data, symbolize_names: true)[:orders][0], store)
+              expect(service.order.shipment_total).to eq(30.0)
+            end
+
+            it 'applies the new shipping method' do
+              service.send(:build_order_for_user, JSON.parse(order_data, symbolize_names: true)[:orders][0], store)
+              expect(service.order.shipments.first.shipping_method.admin_name).to eq('two_day')
+            end
+          end
         end
 
         # TODO: Add error test. This will be done to have json missing some field
