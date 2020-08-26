@@ -6,7 +6,7 @@ class Spree::Core::Importer::Mirakl::Order < Spree::Core::Importer::Order
       payments_hash.each do |p|
         begin
           payment = order.payments.build order: order
-          payment.amount = p[:amount].to_f
+          payment.amount = p[:amount].to_f + order.shipments.sum(:cost)
           # Order API should be using state as that's the normal payment field.
           # spree_wombat serializes payment state as status so imported orders should fall back to status field.
           payment.state = p[:state] || p[:status] || 'completed'
@@ -33,5 +33,19 @@ class Spree::Core::Importer::Mirakl::Order < Spree::Core::Importer::Order
       end
     end
 
+    def create_shipments_from_params(shipments_hash, order)
+      order.create_proposed_shipments
+      shipments_hash.each_with_index do |s, index|
+        shipment = order.shipments[index]
+
+        if s[:shipping_method_id]
+          selected_rate = shipment.shipping_rates.detect { |rate|
+            rate.shipping_method_id == s[:shipping_method_id]
+          }
+          shipment.selected_shipping_rate_id = selected_rate.id if selected_rate
+          shipment.update_amounts
+        end
+      end
+    end
   end
 end

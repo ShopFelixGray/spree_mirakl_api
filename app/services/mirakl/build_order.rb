@@ -42,7 +42,7 @@ module Mirakl
         completed_at: order_information[:created_date],
         payments_attributes: [
           {
-            amount: @order_total,
+            amount: @order_total.to_f,
             payment_method: 'Mirakl',
             created_at: Time.current,
             response_code: order_information[:order_id],
@@ -50,9 +50,8 @@ module Mirakl
           }
         ],
         shipments_attributes: [{
-          stock_location: Spree::StockLocation.find_by(default: true)&.name || Spree::StockLocation.first.name,
-          shipping_method: order_shipping_method(order_information, store),
-          inventory_units: define_inventory_units(order_information)
+          shipping_method_id: order_shipping_method(order_information, store),
+          cost: order_information[:shipping_price].to_f
         }],
         bill_address_attributes: build_address(order_information[:customer][:billing_address], store.user),
         ship_address_attributes: build_address(order_information[:customer][:shipping_address], store.user)
@@ -60,7 +59,7 @@ module Mirakl
     end
 
     def order_shipping_method(order_information, store)
-      store.mirakl_shipping_options.where(shipping_type_label: order_information[:shipping_type_label]).first&.shipping_methods&.first&.name || 'default'
+      store.mirakl_shipping_options.where(shipping_type_label: order_information[:shipping_type_label]).first&.shipping_methods&.first&.id
     end
 
     # We must define all the inventory units that will be associated with the shipment
@@ -94,19 +93,6 @@ module Mirakl
     def build_order_for_user(order_data, store)
       @order = Spree::Core::Importer::Mirakl::Order.import(store.user, get_order_hash(order_data, store))
       @order.shipments.each(&:finalize!) # This is required to decrease inventory
-      order_shipping_adjustment(@order, store, order_data)
-    end
-
-    def order_shipping_adjustment(order, store, order_data)
-      # Select the appropriate rate and make sure not to bill that amount
-      # We can do this by creating an adjustment for the difference
-      order.shipments.each do |shipment|
-        updated_rate = shipment.shipping_rates.find_by(selected: true)
-        if updated_rate.present? && updated_rate.cost
-          adjustment = order.adjustments.create!(order: order, label: 'Mirakl Shipping Discount', amount: -updated_rate.cost, state: 'closed')
-        end
-      end
-      order.reload.update_with_updater!
     end
 
     def build_address(address, user)
