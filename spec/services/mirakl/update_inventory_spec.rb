@@ -3,7 +3,7 @@ require 'spec_helper'
 module Mirakl
   RSpec.describe UpdateInventory do
 
-    let!(:store) { create(:mirakl_store) }
+    let(:store) { create(:mirakl_store) }
 
     let(:service_arguments) {{
       store: store
@@ -63,6 +63,7 @@ module Mirakl
     let(:service) { described_class.new(service_arguments) }
 
     before do
+      stub_request(:get, "https://test.com/api/shipping/carriers").to_return(status: 200, body: '{ "carriers": [] }', headers: {})
       stub_request(:get, "#{store.url}/api/offers?limit=100&max=100&shop_id=#{store.shop_id}").
         to_return(status: 200, body: '{ "offers": [] }', headers: {})
       stub_request(:post, "#{store.url}/api/offers?shop_id=#{store.shop_id}").

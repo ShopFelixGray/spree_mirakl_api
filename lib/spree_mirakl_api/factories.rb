@@ -13,7 +13,6 @@ FactoryGirl.define do
   end
 
   factory :product_no_backorder, parent: :product do
-
     after(:create) do |product|
       product.master.stock_items.each do |a|
         a.update(backorderable: false)
@@ -22,12 +21,17 @@ FactoryGirl.define do
         a.update(backorderable: false)
       end
     end
-
   end
 
   factory :mirakl_payment_method, class: Spree::Gateway::Mirakl do
     name 'Mirakl'
     active true
     auto_capture true
+  end
+
+  factory :mirakl_shipping_options,  class:  Spree::MiraklShippingOption do
+    shipping_type_code 'abc'
+    shipping_type_label 'abc'
+    mirakl_store { FactoryGirl.create(:mirakl_store) }
   end
 end

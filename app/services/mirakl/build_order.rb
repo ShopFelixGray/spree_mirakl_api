@@ -42,16 +42,24 @@ module Mirakl
         completed_at: order_information[:created_date],
         payments_attributes: [
           {
-            amount: @order_total,
+            amount: @order_total.to_f,
             payment_method: 'Mirakl',
             created_at: Time.current,
             response_code: order_information[:order_id],
             source: { mirakl_order_number: order_information[:order_id], mirakl_store_id: store.id }
           }
         ],
+        shipments_attributes: [{
+          shipping_method_id: order_shipping_method(order_information, store),
+          cost: order_information[:shipping_price].to_f
+        }],
         bill_address_attributes: build_address(order_information[:customer][:billing_address], store.user),
         ship_address_attributes: build_address(order_information[:customer][:shipping_address], store.user)
       }
+    end
+
+    def order_shipping_method(order_information, store)
+      store.mirakl_shipping_options.where(shipping_type_label: order_information[:shipping_type_label]).first&.shipping_methods&.first&.id
     end
 
     def line_items_hash(order_lines)
