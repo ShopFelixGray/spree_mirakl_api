@@ -92,7 +92,7 @@ class Spree::Core::Importer::Mirakl::Order < Spree::Core::Importer::Order
         if s[:shipping_method_id]
           shipment.refresh_rates(Spree::ShippingMethod::DISPLAY_ON_FRONT_AND_BACK_END)
           selected_rate = shipment.shipping_rates.detect { |rate|
-            rate.shipping_method_id == s[:shipping_method_id]
+            rate.shipping_method_id == s[:shipping_method_id][0]
           }
           shipment.selected_shipping_rate_id = selected_rate.id if selected_rate
           shipment.update_amounts
