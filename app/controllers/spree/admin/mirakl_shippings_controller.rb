@@ -1,15 +1,14 @@
 module Spree
   module Admin
-    class MiraklShippingController < Spree::Admin::ResourceController
-      def mirakl_refresh_carriers
-        store = Spree::MiraklStore.find_by(params[:mirakl_store_id])
-        store.get_carriers_from_mirakl
+    class MiraklShippingsController < Spree::Admin::ResourceController
+      before_action :set_mirakl_store
+      def refresh_carriers
+        @mirakl_store.get_carriers_from_mirakl
         flash[:notice] = Spree.t(:carriers_synced)
         redirect_to admin_mirakl_stores_path
       end
 
-      def mirakl_shipping_options
-        @mirakl_store = Spree::MiraklStore.includes(mirakl_shipping_options: [:shipping_methods]).find(params[:mirakl_store_id])
+      def shipping_options
         reasons_request = SpreeMirakl::Api.new(@mirakl_store).shipping_options()
         if reasons_request.success?
           shipping_options = JSON.parse(reasons_request.body, symbolize_names: true)[:shippings]
@@ -25,8 +24,8 @@ module Spree
         end
       end
 
-      def mirakl_shipping_to_shipping_method
-        @mirakl_store = Spree::MiraklStore.find(params[:mirakl_store_id])
+      def shipping_to_shipping_method
+        
         begin
           @mirakl_store.mirakl_shipping_options.all.each do |shipping_option|
             if params[:shipping_option][shipping_option.id.to_s]
@@ -38,6 +37,12 @@ module Spree
           flash[:error] = e.message
         end
         redirect_to admin_mirakl_stores_path
+      end
+
+      private
+
+      def set_mirakl_store
+        @mirakl_store = Spree::MiraklStore.find(params[:mirakl_store_id])
       end
     end
   end
