@@ -207,12 +207,12 @@ module Mirakl
 
           it 'selects the correct shipping method' do
             service.send(:build_order_for_user, JSON.parse(order_data, symbolize_names: true)[:orders][0], store)
-            expect(service.order.shipments.first.shipping_method.id).to eq(shipping_method.id)
+            expect(service.order.shipments.first.shipping_method.id).to eq(shipping_method_2.id)
           end
 
           it 'has the correct shipping cost' do
             service.send(:build_order_for_user, JSON.parse(order_data, symbolize_names: true)[:orders][0], store)
-            expect(service.order.shipment_total).to eq(10.0)
+            expect(service.order.shipment_total).to eq(0.0)
           end
 
           describe 'mirakl mapping works' do
