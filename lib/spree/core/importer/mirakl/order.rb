@@ -1,6 +1,7 @@
 class Spree::Core::Importer::Mirakl::Order < Spree::Core::Importer::Order
   class << self
 
+    # Override because to correctly price a shipment cost we need an address. Which isnt called till update attributes
     def import(user, params)
       begin
         ensure_country_id_from_params params[:ship_address_attributes]
@@ -15,6 +16,7 @@ class Spree::Core::Importer::Mirakl::Order < Spree::Core::Importer::Order
 
         shipments_attrs = params.delete(:shipments_attributes)
 
+        # Shipments and payments moved to after update attributes
         create_line_items_from_params(params.delete(:line_items_attributes), order)
         create_adjustments_from_params(params.delete(:adjustments_attributes), order)
 
@@ -25,10 +27,13 @@ class Spree::Core::Importer::Mirakl::Order < Spree::Core::Importer::Order
 
         params.delete(:user_id) unless user.try(:has_spree_role?, "admin") && params.key?(:user_id)
 
+        # Remove payment before update
         payment_attributes = params.delete(:payments_attributes)
         order.update_attributes!(params)
 
+        # Call this after update attributes so addresses are set
         create_shipments_from_params(shipments_attrs, order)
+        # Called after shipments so shipment price can be added to payment total
         create_payments_from_params(payment_attributes, order)
 
         # Really ensure that the order totals & states are correct
@@ -77,6 +82,8 @@ class Spree::Core::Importer::Mirakl::Order < Spree::Core::Importer::Order
       end
     end
 
+    # We override create shipments because we just want to do create_proposed_shipments 
+    # and then select the shipping id that maps to the mirkal option
     def create_shipments_from_params(shipments_hash, order)
       order.create_proposed_shipments
       shipments_hash.each_with_index do |s, index|

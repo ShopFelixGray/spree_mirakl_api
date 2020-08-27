@@ -2,6 +2,7 @@ module Spree
   module Admin
     class MiraklShippingsController < Spree::Admin::ResourceController
       before_action :set_mirakl_store
+
       def refresh_carriers
         @mirakl_store.get_carriers_from_mirakl
         flash[:notice] = Spree.t(:carriers_synced)
@@ -9,7 +10,7 @@ module Spree
       end
 
       def shipping_options
-        reasons_request = SpreeMirakl::Api.new(@mirakl_store).shipping_options()
+        reasons_request = SpreeMirakl::Api.new(@mirakl_store).shipping_options
         if reasons_request.success?
           shipping_options = JSON.parse(reasons_request.body, symbolize_names: true)[:shippings]
           shipping_options.each do |shipping_option|
@@ -25,7 +26,6 @@ module Spree
       end
 
       def shipping_to_shipping_method
-        
         begin
           @mirakl_store.mirakl_shipping_options.all.each do |shipping_option|
             if params[:shipping_option][shipping_option.id.to_s]

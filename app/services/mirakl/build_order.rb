@@ -62,19 +62,6 @@ module Mirakl
       store.mirakl_shipping_options.where(shipping_type_label: order_information[:shipping_type_label]).first&.shipping_methods&.first&.id
     end
 
-    # We must define all the inventory units that will be associated with the shipment
-    # So if a line item has a quantity of 2 we must make 2 inventory units in the array
-    def define_inventory_units(order_information)
-      inventory_units = []
-      order_information[:order_lines].each do |order_line|
-        order_line[:quantity].to_i.times do
-          inventory_units <<  { sku: order_line[:offer_sku].downcase }
-        end
-      end
-
-      inventory_units
-    end
-
     def line_items_hash(order_lines)
       line_items = []
       order_lines.each do |order_line|
