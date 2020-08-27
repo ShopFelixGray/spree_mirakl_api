@@ -2,6 +2,7 @@ module Spree
   class MiraklStore < ActiveRecord::Base
     belongs_to :user
     has_many :mirakl_refund_reasons, dependent: :destroy
+    has_many :mirakl_shipping_options, dependent: :destroy
     has_many :mirakl_store_carriers, dependent: :destroy
     has_many :mirakl_transactions
 

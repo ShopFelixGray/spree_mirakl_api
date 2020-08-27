@@ -4,16 +4,16 @@ module Spree
       def index
         @mirakl_stores = Spree::MiraklStore.all
       end
-    
+
       def new
         @mirakl_store = Spree::MiraklStore.new
       end
-    
+
       def create
         begin
           ActiveRecord::Base.transaction do
             @mirakl_store = Spree::MiraklStore.new(mirakl_store_params)
-        
+
             if @mirakl_store.save
               mirakl_request = SpreeMirakl::Api.new(@mirakl_store)
               request = mirakl_request.account
@@ -34,14 +34,14 @@ module Spree
           render :new
         end
       end
-    
+
       def edit
         @mirakl_store = Spree::MiraklStore.includes(mirakl_refund_reasons: [:return_authorization_reasons]).find(params[:id])
       end
-    
+
       def update
         @mirakl_store.update(mirakl_store_params)
-    
+
         if @mirakl_store.save
           flash[:notice] = Spree.t(:mirakl_store_updated)
           redirect_to admin_mirakl_stores_path
@@ -59,7 +59,7 @@ module Spree
         end
         redirect_to admin_mirakl_stores_path
       end
-    
+
       def reason_mapper
         @mirakl_store = Spree::MiraklStore.includes(mirakl_refund_reasons: [:return_authorization_reasons]).find(params[:mirakl_store_id])
         reasons_request = SpreeMirakl::Api.new(@mirakl_store).refund_reasons()
@@ -90,26 +90,19 @@ module Spree
         end
         redirect_to admin_mirakl_stores_path
       end
-    
+
       def refresh_inventory
         MiraklInventoryUpdateJob.perform_later(params[:mirakl_store_id])
         flash[:notice] = Spree.t(:refresh_queued)
         redirect_to admin_mirakl_stores_path
       end
 
-      def refresh_carriers
-        store = Spree::MiraklStore.find_by(params[:mirakl_store_id])
-        store.get_carriers_from_mirakl
-        flash[:notice] = Spree.t(:carriers_synced)
-        redirect_to admin_mirakl_stores_path
-      end
-    
       private
-    
+
       def set_mirakl_store
         @mirakl_store = Spree::MiraklStore.includes(mirakl_refund_reasons: [:return_authorization_reasons]).find(params[:id])
       end
-    
+
       def mirakl_store_params
         params.require(:mirakl_store).permit(:name, :api_key, :url, :active, :user_id)
       end
@@ -123,7 +116,7 @@ module Spree
           raise Expection(Spree.t(:sync_refund_issue))
         end
       end
-    
+
       def refund_creates(refund_types)
         refund_types.each do |refund_type|
           unless  @mirakl_store.mirakl_refund_reasons.where(label: refund_type[:label], code: refund_type[:code]).present?
@@ -132,6 +125,6 @@ module Spree
         end
       end
     end
-    
+
   end
 end

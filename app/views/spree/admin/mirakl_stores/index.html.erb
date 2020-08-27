@@ -26,7 +26,8 @@
         <td class="presentation"><%= mirakl_store.active %></td>
         <td class="actions actions-2 text-right">
           <%= link_to_with_icon "stock", Spree.t(:refresh_inventory), admin_mirakl_store_refresh_inventory_path(mirakl_store), { class: 'admin_edit_mirakl_store btn btn-primary btn-sm', no_text: true } %>
-          <%= link_to_with_icon "shipment", Spree.t(:refresh_carriers), admin_mirakl_store_refresh_carriers_path(mirakl_store), { class: 'admin_edit_mirakl_store btn btn-primary btn-sm', no_text: true } %>
+          <%= link_to_with_icon "shipment", Spree.t(:mirakl_shipping_options), shipping_options_admin_mirakl_store_mirakl_shipping_path(mirakl_store), { class: 'admin_edit_mirakl_store btn btn-primary btn-sm', no_text: true } %>
+          <%= link_to_with_icon "plane", Spree.t(:refresh_carriers), refresh_carriers_admin_mirakl_store_mirakl_shipping_path(mirakl_store), { class: 'admin_edit_mirakl_store btn btn-primary btn-sm', no_text: true } %>
           <%= link_to_with_icon "transfer", Spree.t(:refund_reason_mapping), admin_mirakl_store_reason_mapper_path(mirakl_store), { class: 'admin_edit_mirakl_store btn btn-primary btn-sm', no_text: true } %>
           <%= link_to_edit(mirakl_store, class: 'admin_edit_mirakl_store', no_text: true) %>
           <%= link_to_delete(mirakl_store, no_text: true) %>
