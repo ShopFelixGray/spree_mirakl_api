@@ -59,7 +59,7 @@ module Mirakl
     end
 
     def order_shipping_method(order_information, store)
-      store.mirakl_shipping_options.where(shipping_type_label: order_information[:shipping_type_label]).first&.shipping_methods&.first&.id
+      store.mirakl_shipping_options.find_by(shipping_type_label: order_information[:shipping_type_label])&.shipping_methods&.ids
     end
 
     def line_items_hash(order_lines)
