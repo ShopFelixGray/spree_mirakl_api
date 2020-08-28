@@ -49,17 +49,9 @@ module Mirakl
             source: { mirakl_order_number: order_information[:order_id], mirakl_store_id: store.id }
           }
         ],
-        shipments_attributes: [{
-          shipping_method_id: order_shipping_method(order_information, store),
-          cost: order_information[:shipping_price].to_f
-        }],
         bill_address_attributes: build_address(order_information[:customer][:billing_address], store.user),
         ship_address_attributes: build_address(order_information[:customer][:shipping_address], store.user)
       }
-    end
-
-    def order_shipping_method(order_information, store)
-      store.mirakl_shipping_options.find_by(shipping_type_label: order_information[:shipping_type_label])&.shipping_methods&.ids
     end
 
     def line_items_hash(order_lines)
@@ -79,7 +71,27 @@ module Mirakl
 
     def build_order_for_user(order_data, store)
       @order = Spree::Core::Importer::Mirakl::Order.import(store.user, get_order_hash(order_data, store))
-      @order.shipments.each(&:finalize!) # This is required to decrease inventory
+      update_shipping_method(order_data, store, @order)
+    end
+
+    def update_shipping_method(order_data, store, order)
+      shipping_methods = available_spree_shipping_methods(order_data, store)
+      order.shipments.each do |shipment|
+        # get all the available shipping rates
+        shipment.refresh_rates(Spree::ShippingMethod::DISPLAY_ON_FRONT_AND_BACK_END)
+
+        selected_rate = shipment.shipping_rates.detect { |rate|
+          rate.shipping_method_id if shipping_methods.ids.include? rate.shipping_method_id
+        }
+        shipment.selected_shipping_rate_id = selected_rate.id if selected_rate
+        
+        # This is required to decrease inventory
+        shipment.finalize!
+      end
+    end
+
+    def available_spree_shipping_methods(order_data, store)
+      store.mirakl_shipping_options.find_by(shipping_type_label: order_data[:shipping_type_label])&.shipping_methods
     end
 
     def build_address(address, user)
