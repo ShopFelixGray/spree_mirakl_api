@@ -310,6 +310,7 @@ module Mirakl
 
             it 'applies the new shipping method cost' do
               service.send(:build_order_for_user, JSON.parse(order_data, symbolize_names: true)[:orders][0], store)
+              service.order.reload
               expect(service.order.shipment_total).to eq(30.0)
             end
 
