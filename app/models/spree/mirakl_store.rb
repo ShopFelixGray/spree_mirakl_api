@@ -34,5 +34,18 @@ module Spree
         Spree::MiraklStoreCarrier.find_or_create_by(label: carrier[:label].downcase, code: carrier[:code], mirakl_store: self)
       end
     end
+
+    def return_shipping_method_filter
+      case self.shipping_method_display_rate
+      when 'both'
+        Spree::ShippingMethod::DISPLAY_ON_FRONT_AND_BACK_END
+      when 'front_end'
+        Spree::ShippingMethod::DISPLAY_ON_FRONT_END
+      when 'back_end'
+        Spree::ShippingMethod::DISPLAY_ON_BACK_END
+      else
+        Spree::ShippingMethod::DISPLAY_ON_FRONT_AND_BACK_END
+      end
+    end
   end
 end
