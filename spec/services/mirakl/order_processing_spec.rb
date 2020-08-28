@@ -3,7 +3,7 @@ require 'spec_helper'
 module Mirakl
   RSpec.describe OrderProcessing do
 
-    let!(:store) { create(:mirakl_store) }
+    let(:store) { create(:mirakl_store) }
 
     let(:service_arguments) {{
       stores: [store]
@@ -12,6 +12,7 @@ module Mirakl
     let(:service) { described_class.new(service_arguments) }
 
     before do
+      stub_request(:get, "https://test.com/api/shipping/carriers").to_return(status: 200, body: '{ "carriers": [] }', headers: {})
       stub_request(:get, "#{store.url}/api/orders?limit=50&max=50&order_state_codes=WAITING_ACCEPTANCE,SHIPPING&shop_id=#{store.shop_id}").
         to_return(status: 200, body: '{ "orders": [] }', headers: {})
     end
