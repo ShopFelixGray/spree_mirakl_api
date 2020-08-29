@@ -104,7 +104,7 @@ module Spree
       end
 
       def mirakl_store_params
-        params.require(:mirakl_store).permit(:name, :api_key, :url, :active, :user_id)
+        params.require(:mirakl_store).permit(:name, :api_key, :url, :active, :user_id, :shipping_method_display_rate)
       end
 
       def reasons_request_sync(mirakl_request)

@@ -9,7 +9,7 @@
       <% @mirakl_shipping_options.all.each do |shipping_option| %>
         <tr>
           <td><%= label_tag "#{shipping_option.shipping_type_label}:" %></td>
-          <td><%= form.select shipping_option.id, options_for_select(Spree::ShippingMethod.all.collect{ |u| [u.name, u.id] }, Spree::ShippingMethod.joins(:mirakl_shipping_options).where(spree_mirakl_shipping_options: { id: shipping_option.id }).first.try(:id) ) %></td>
+          <td><%= form.select shipping_option.id, options_for_select(Spree::ShippingMethod.all.select{ |method| method.available_to_display(@mirakl_store.return_shipping_method_filter)}.collect{ |u| [u.name, u.id] }, Spree::ShippingMethod.joins(:mirakl_shipping_options).where(spree_mirakl_shipping_options: { id: shipping_option.id }).first.try(:id) ) %></td>
         </tr>
       <% end %>
     <% end %>

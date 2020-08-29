@@ -80,7 +80,7 @@ module Mirakl
       return unless shipping_methods.present?
       order.shipments.each do |shipment|
         # get all the available shipping rates
-        shipment.refresh_rates(Spree::ShippingMethod::DISPLAY_ON_FRONT_AND_BACK_END)
+        shipment.refresh_rates(store.return_shipping_method_filter)
         selected_rate = shipment.shipping_rates.detect { |rate|
           rate.shipping_method_id if shipping_methods.ids.include? rate.shipping_method_id
         }
