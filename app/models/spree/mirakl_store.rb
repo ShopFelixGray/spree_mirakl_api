@@ -37,8 +37,6 @@ module Spree
 
     def return_shipping_method_filter
       case self.shipping_method_display_rate
-      when 'both'
-        Spree::ShippingMethod::DISPLAY_ON_FRONT_AND_BACK_END
       when 'front_end'
         Spree::ShippingMethod::DISPLAY_ON_FRONT_END
       when 'back_end'
